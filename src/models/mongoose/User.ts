@@ -4,6 +4,7 @@ import { UserPreferences } from "@/types";
 export interface IUserDocument extends Document {
   email: string;
   name?: string;
+  passwordHash?: string;
   preferences: UserPreferences;
   createdAt: Date;
   updatedAt: Date;
@@ -13,6 +14,7 @@ const UserSchema = new Schema<IUserDocument>(
   {
     email: { type: String, required: true, unique: true, index: true },
     name: { type: String },
+    passwordHash: { type: String },
     preferences: {
       theme: { type: String, enum: ["light", "dark", "system"], default: "system" },
       accentColor: { type: String, default: "#0284c7" },

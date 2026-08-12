@@ -39,6 +39,7 @@ export async function connectToDatabase(): Promise<typeof mongoose> {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
+      dbName: "lifeos",
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((m) => {
@@ -59,3 +60,5 @@ export async function connectToDatabase(): Promise<typeof mongoose> {
 
   return cached.conn;
 }
+
+export default connectToDatabase;

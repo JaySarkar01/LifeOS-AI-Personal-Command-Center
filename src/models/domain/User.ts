@@ -4,6 +4,7 @@ export interface UserProps {
   id: string;
   email: string;
   name?: string;
+  passwordHash?: string;
   preferences?: Partial<UserPreferences>;
   createdAt?: Date;
 }
@@ -12,6 +13,7 @@ export class User {
   public readonly id: string;
   public email: string;
   public name?: string;
+  public passwordHash?: string;
   public preferences: UserPreferences;
   public readonly createdAt: Date;
 
@@ -19,6 +21,7 @@ export class User {
     this.id = props.id;
     this.email = props.email;
     this.name = props.name;
+    this.passwordHash = props.passwordHash;
     this.preferences = {
       theme: "system",
       accentColor: "#0284c7",

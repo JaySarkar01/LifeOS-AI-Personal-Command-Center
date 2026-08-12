@@ -4,10 +4,13 @@ export interface HabitProps {
   id: string;
   userId: string;
   title: string;
+  description?: string;
   frequency?: HabitFrequency;
   targetDaysPerWeek?: number;
+  color?: string;
+  archived?: boolean;
   streak?: number;
-  completionDates?: Date[];
+  completionLogs?: Date[];
   createdAt?: Date;
 }
 
@@ -15,8 +18,11 @@ export class Habit {
   public readonly id: string;
   public readonly userId: string;
   public title: string;
+  public description?: string;
   public frequency: HabitFrequency;
   public targetDaysPerWeek: number;
+  public color?: string;
+  public archived: boolean;
   public streak: number;
   public completionDates: Date[];
   public readonly createdAt: Date;
@@ -25,10 +31,13 @@ export class Habit {
     this.id = props.id;
     this.userId = props.userId;
     this.title = props.title;
+    this.description = props.description;
     this.frequency = props.frequency || "daily";
     this.targetDaysPerWeek = props.targetDaysPerWeek || 7;
+    this.color = props.color;
+    this.archived = props.archived || false;
     this.streak = props.streak || 0;
-    this.completionDates = props.completionDates || [];
+    this.completionDates = props.completionLogs || [];
     this.createdAt = props.createdAt || new Date();
   }
 

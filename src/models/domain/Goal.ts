@@ -4,6 +4,7 @@ export interface GoalProps {
   id: string;
   userId: string;
   title: string;
+  description?: string;
   targetDate?: Date;
   status?: GoalStatus;
   milestones?: Milestone[];
@@ -14,6 +15,7 @@ export class Goal {
   public readonly id: string;
   public readonly userId: string;
   public title: string;
+  public description?: string;
   public targetDate?: Date;
   public status: GoalStatus;
   public milestones: Milestone[];
@@ -23,6 +25,7 @@ export class Goal {
     this.id = props.id;
     this.userId = props.userId;
     this.title = props.title;
+    this.description = props.description;
     this.targetDate = props.targetDate;
     this.status = props.status || "in_progress";
     this.milestones = props.milestones || [];

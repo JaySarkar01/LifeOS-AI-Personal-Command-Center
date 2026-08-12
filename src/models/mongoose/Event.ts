@@ -4,9 +4,11 @@ import { EventType } from "@/types";
 export interface IEventDocument extends Document {
   userId: mongoose.Types.ObjectId;
   title: string;
+  description?: string;
   startTime: Date;
   endTime: Date;
   type: EventType;
+  location?: string;
   isAllDay: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -16,6 +18,7 @@ const EventSchema = new Schema<IEventDocument>(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
     title: { type: String, required: true },
+    description: { type: String },
     startTime: { type: Date, required: true, index: true },
     endTime: { type: Date, required: true },
     type: {
@@ -23,6 +26,7 @@ const EventSchema = new Schema<IEventDocument>(
       enum: ["focus_session", "meeting", "reminder", "personal"],
       default: "personal",
     },
+    location: { type: String },
     isAllDay: { type: Boolean, default: false },
   },
   { timestamps: true }

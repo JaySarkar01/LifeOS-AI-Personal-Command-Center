@@ -11,6 +11,7 @@ export interface IMilestoneSubDocument {
 export interface IGoalDocument extends Document {
   userId: mongoose.Types.ObjectId;
   title: string;
+  description?: string;
   targetDate?: Date;
   status: GoalStatus;
   milestones: IMilestoneSubDocument[];
@@ -29,6 +30,7 @@ const GoalSchema = new Schema<IGoalDocument>(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
     title: { type: String, required: true },
+    description: { type: String },
     targetDate: { type: Date, index: true },
     status: {
       type: String,

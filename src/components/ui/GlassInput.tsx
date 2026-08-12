@@ -3,17 +3,25 @@ import { cn } from "@/lib/utils";
 
 export interface GlassInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string;
-  icon?: React.ReactNode;
+  icon?: React.ReactNode | React.ElementType;
 }
 
 export const GlassInput = React.forwardRef<HTMLInputElement, GlassInputProps>(
   ({ className, error, icon, type = "text", disabled, ...props }, ref) => {
+    const IconComponent = typeof icon === "function" || (typeof icon === "object" && icon !== null && "render" in icon)
+      ? (icon as React.ElementType)
+      : null;
+
     return (
       <div className="relative w-full flex flex-col gap-1">
         <div className="relative w-full">
           {icon && (
             <div className="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center text-muted pointer-events-none">
-              {icon}
+              {IconComponent ? (
+                <IconComponent className="w-4 h-4" />
+              ) : (
+                (icon as React.ReactNode)
+              )}
             </div>
           )}
           <input

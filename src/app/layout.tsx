@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ui/ThemeProvider";
+import { AuthProvider } from "@/components/providers/AuthProvider";
 
 const fontDisplay = Outfit({
   variable: "--font-display",
@@ -54,7 +55,9 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col font-sans antialiased text-foreground bg-background">
-        <ThemeProvider>{children}</ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider>{children}</ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );

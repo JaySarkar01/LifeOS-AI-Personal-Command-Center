@@ -7,6 +7,7 @@ export interface INoteDocument extends Document {
   content: string;
   type: NoteType;
   tags: string[];
+  archived?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -18,6 +19,7 @@ const NoteSchema = new Schema<INoteDocument>(
     content: { type: String, default: "" },
     type: { type: String, enum: ["quick", "document", "journal", "code"], default: "quick" },
     tags: [{ type: String }],
+    archived: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
