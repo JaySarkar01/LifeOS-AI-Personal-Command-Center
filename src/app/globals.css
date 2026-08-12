@@ -1,0 +1,157 @@
+@import "tailwindcss";
+
+:root {
+  /* Fonts */
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+
+  /* Light Theme Color Tokens — Warm off-white base, frosted glass, muted slate */
+  --background: #f6f5f2;
+  --foreground: #14171f;
+  
+  /* Glass Surfaces (Light Mode) */
+  --card: rgba(255, 255, 255, 0.65);
+  --card-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.45));
+  --card-border: rgba(20, 23, 31, 0.07);
+  --card-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  
+  --panel: rgba(255, 255, 255, 0.78);
+  --panel-border: rgba(20, 23, 31, 0.09);
+  
+  --muted: #64748b;
+  --border: rgba(20, 23, 31, 0.08);
+  
+  /* Accents */
+  --accent: #0284c7; /* Cool blue primary */
+  --accent-hover: #0369a1;
+  --accent-foreground: #ffffff;
+  --accent-muted: rgba(2, 132, 199, 0.08);
+
+  --accent-secondary: #6366f1; /* Indigo/violet secondary */
+  --accent-secondary-muted: rgba(99, 102, 241, 0.08);
+
+  /* Semantics */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --danger-foreground: #ffffff;
+  --danger-muted: rgba(239, 68, 68, 0.08);
+  
+  --shadow: rgba(15, 23, 42, 0.04);
+  --shadow-lg: rgba(15, 23, 42, 0.08);
+}
+
+.dark {
+  /* Dark Theme Color Tokens — Deep atmospheric charcoal/navy, ambient visionOS glass */
+  --background: #080b11;
+  --foreground: #f1f5f9;
+  
+  /* Glass Surfaces (Dark Mode) */
+  --card: rgba(15, 22, 35, 0.55);
+  --card-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+  --card-border: rgba(255, 255, 255, 0.08);
+  --card-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  
+  --panel: rgba(12, 18, 28, 0.72);
+  --panel-border: rgba(255, 255, 255, 0.1);
+  
+  --muted: #94a3b8;
+  --border: rgba(255, 255, 255, 0.08);
+  
+  /* Accents */
+  --accent: #38bdf8; /* Calm bright sky blue */
+  --accent-hover: #7dd3fc;
+  --accent-foreground: #030712;
+  --accent-muted: rgba(56, 189, 248, 0.12);
+
+  --accent-secondary: #818cf8; /* Soft violet/indigo secondary */
+  --accent-secondary-muted: rgba(129, 140, 248, 0.12);
+
+  /* Semantics */
+  --success: #34d399;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --danger-foreground: #450a0a;
+  --danger-muted: rgba(248, 113, 113, 0.12);
+
+  --shadow: rgba(0, 0, 0, 0.35);
+  --shadow-lg: rgba(0, 0, 0, 0.55);
+}
+
+@theme {
+  --font-sans: var(--font-body), sans-serif;
+  --font-display: var(--font-display), sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-border: var(--card-border);
+  --color-panel: var(--panel);
+  --color-panel-border: var(--panel-border);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-muted: var(--accent-muted);
+
+  --color-accent-secondary: var(--accent-secondary);
+  --color-accent-secondary-muted: var(--accent-secondary-muted);
+
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-danger-muted: var(--danger-muted);
+
+  --shadow-glass: 0 8px 32px 0 var(--shadow);
+  --shadow-glass-lg: 0 16px 48px 0 var(--shadow-lg);
+}
+
+/* Base elements & Ambient background */
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  transition: background-color 0.4s ease, color 0.4s ease;
+  overflow-x: hidden;
+}
+
+/* Custom premium scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}
+
+/* Smooth selection */
+::selection {
+  background-color: var(--accent-muted);
+  color: var(--foreground);
+}
+
+/* Accessibility outline */
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-delay: 0s !important;
+    animation-duration: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0s !important;
+    scroll-behavior: auto !important;
+  }
+}
