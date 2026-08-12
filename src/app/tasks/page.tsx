@@ -288,7 +288,7 @@ export default function TasksPage() {
           <ListSkeleton count={4} />
         ) : filteredTasks.length === 0 ? (
           <EmptyState
-            icon={CheckSquare as any}
+            icon={CheckSquare as React.ElementType}
             title="No tasks found"
             description="You don't have any tasks matching the selected filters. Create your first task to get started."
             actionLabel="Add Task"

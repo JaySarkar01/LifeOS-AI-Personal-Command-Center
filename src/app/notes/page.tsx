@@ -158,7 +158,7 @@ export default function NotesPage() {
           <ListSkeleton count={4} />
         ) : notes.length === 0 ? (
           <EmptyState
-            icon={StickyNote as any}
+            icon={StickyNote as React.ElementType}
             title="No notes captured"
             description="Create your first note to start building your personal knowledge repository."
             actionLabel="Create Note"

@@ -7,9 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "npx tsx tests/domain.test.ts && npx tsx tests/phase4.test.ts"
+    "test": "npx tsx tests/domain.test.ts && npx tsx tests/phase4.test.ts && npx tsx tests/phase5.test.ts"
   },
   "dependencies": {
+    "@google/genai": "^2.16.0",
     "@types/bcryptjs": "^2.4.6",
     "bcryptjs": "^3.0.3",
     "framer-motion": "^13.1.0",
