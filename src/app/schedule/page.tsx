@@ -11,6 +11,8 @@ import { GlassInput } from "@/components/ui/GlassInput";
 import { GlassBadge } from "@/components/ui/GlassBadge";
 import { ListSkeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useToast } from "@/components/providers/ToastProvider";
 
 interface EventItem {
   id: string;
@@ -23,11 +25,13 @@ interface EventItem {
 }
 
 export default function SchedulePage() {
+  const { showToast } = useToast();
   const [events, setEvents] = useState<EventItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Modal State
+  // Modal & Confirmation State
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteEventTargetId, setDeleteEventTargetId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
@@ -80,6 +84,7 @@ export default function SchedulePage() {
         setStartTime("");
         setEndTime("");
         setType("focus_session");
+        showToast("Event Scheduled", undefined, "success");
       }
     } catch (err) {
       console.error(err);
@@ -88,8 +93,14 @@ export default function SchedulePage() {
     }
   };
 
-  const deleteEvent = async (id: string) => {
+  const confirmDeleteEvent = async () => {
+    if (!deleteEventTargetId) return;
+    const id = deleteEventTargetId;
+    setDeleteEventTargetId(null);
+
     setEvents((prev) => prev.filter((e) => e.id !== id));
+    showToast("Event Removed", undefined, "info");
+
     try {
       await fetch(`/api/events/${id}`, { method: "DELETE" });
     } catch (err) {
@@ -156,8 +167,9 @@ export default function SchedulePage() {
                         {event.type.replace("_", " ")}
                       </GlassBadge>
                       <button
-                        onClick={() => deleteEvent(event.id)}
+                        onClick={() => setDeleteEventTargetId(event.id)}
                         className="p-1 rounded text-muted hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Delete Event"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -168,6 +180,16 @@ export default function SchedulePage() {
             </div>
           </GlassPanel>
         )}
+
+        {/* Delete Confirmation Modal */}
+        <ConfirmDialog
+          isOpen={!!deleteEventTargetId}
+          title="Remove Event"
+          description="Are you sure you want to remove this scheduled timeline event?"
+          confirmLabel="Remove"
+          onConfirm={confirmDeleteEvent}
+          onCancel={() => setDeleteEventTargetId(null)}
+        />
 
         {/* Create Event Modal */}
         {isModalOpen && (

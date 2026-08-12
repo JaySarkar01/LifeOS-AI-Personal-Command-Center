@@ -12,6 +12,8 @@ import { GlassInput } from "@/components/ui/GlassInput";
 import { GlassBadge } from "@/components/ui/GlassBadge";
 import { ListSkeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useToast } from "@/components/providers/ToastProvider";
 
 interface MilestoneItem {
   id: string;
@@ -30,11 +32,13 @@ interface GoalItem {
 }
 
 export default function GoalsPage() {
+  const { showToast } = useToast();
   const [goals, setGoals] = useState<GoalItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Modal State
+  // Modal & Confirmation State
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteGoalTargetId, setDeleteGoalTargetId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [targetDate, setTargetDate] = useState("");
@@ -87,6 +91,7 @@ export default function GoalsPage() {
         setTitle("");
         setDescription("");
         setTargetDate("");
+        showToast("Goal Created", undefined, "success");
       }
     } catch (err) {
       console.error(err);
@@ -116,6 +121,7 @@ export default function GoalsPage() {
           )
         );
         setNewMilestoneText((prev) => ({ ...prev, [goalId]: "" }));
+        showToast("Milestone Added", undefined, "success");
       }
     } catch (err) {
       console.error(err);
@@ -145,8 +151,14 @@ export default function GoalsPage() {
     }
   };
 
-  const deleteGoal = async (id: string) => {
+  const confirmDeleteGoal = async () => {
+    if (!deleteGoalTargetId) return;
+    const id = deleteGoalTargetId;
+    setDeleteGoalTargetId(null);
+
     setGoals((prev) => prev.filter((g) => g.id !== id));
+    showToast("Goal Deleted", undefined, "info");
+
     try {
       await fetch(`/api/goals/${id}`, { method: "DELETE" });
     } catch (err) {
@@ -204,8 +216,9 @@ export default function GoalsPage() {
                   </div>
 
                   <button
-                    onClick={() => deleteGoal(goal.id)}
+                    onClick={() => setDeleteGoalTargetId(goal.id)}
                     className="p-1 rounded text-muted hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                    title="Delete Goal"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -327,6 +340,16 @@ export default function GoalsPage() {
             </GlassPanel>
           </div>
         )}
+
+        {/* Delete Confirmation Modal */}
+        <ConfirmDialog
+          isOpen={!!deleteGoalTargetId}
+          title="Delete Goal"
+          description="Are you sure you want to delete this goal? All associated milestone items and progress stats will be removed."
+          confirmLabel="Delete"
+          onConfirm={confirmDeleteGoal}
+          onCancel={() => setDeleteGoalTargetId(null)}
+        />
       </PageContainer>
     </AppShell>
   );

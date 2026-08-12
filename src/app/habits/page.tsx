@@ -11,6 +11,8 @@ import { GlassButton } from "@/components/ui/GlassButton";
 import { GlassInput } from "@/components/ui/GlassInput";
 import { ListSkeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useToast } from "@/components/providers/ToastProvider";
 
 interface HabitItem {
   id: string;
@@ -24,11 +26,13 @@ interface HabitItem {
 }
 
 export default function HabitsPage() {
+  const { showToast } = useToast();
   const [habits, setHabits] = useState<HabitItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Modal state
+  // Modal & Confirmation state
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteHabitTargetId, setDeleteHabitTargetId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [frequency, setFrequency] = useState("daily");
   const [targetDays, setTargetDays] = useState(7);
@@ -56,11 +60,12 @@ export default function HabitsPage() {
   }, []);
 
   const toggleHabit = async (id: string, currentCompleted: boolean) => {
+    const nextCompleted = !currentCompleted;
+
     // Optimistic UI update
     setHabits((prev) =>
       prev.map((h) => {
         if (h.id === id) {
-          const nextCompleted = !currentCompleted;
           return {
             ...h,
             completedToday: nextCompleted,
@@ -69,6 +74,12 @@ export default function HabitsPage() {
         }
         return h;
       })
+    );
+
+    showToast(
+      nextCompleted ? "Habit Logged Today" : "Habit Unchecked",
+      undefined,
+      "success"
     );
 
     try {
@@ -83,8 +94,14 @@ export default function HabitsPage() {
     }
   };
 
-  const deleteHabit = async (id: string) => {
+  const confirmDeleteHabit = async () => {
+    if (!deleteHabitTargetId) return;
+    const id = deleteHabitTargetId;
+    setDeleteHabitTargetId(null);
+
     setHabits((prev) => prev.filter((h) => h.id !== id));
+    showToast("Habit Deleted", undefined, "info");
+
     try {
       await fetch(`/api/habits/${id}`, { method: "DELETE" });
     } catch (err) {
@@ -166,7 +183,7 @@ export default function HabitsPage() {
                     </span>
                   </div>
                   <button
-                    onClick={() => deleteHabit(habit.id)}
+                    onClick={() => setDeleteHabitTargetId(habit.id)}
                     className="p-1 rounded text-muted hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
                     title="Delete Habit"
                   >
@@ -201,6 +218,16 @@ export default function HabitsPage() {
             ))}
           </div>
         )}
+
+        {/* Delete Confirmation Modal */}
+        <ConfirmDialog
+          isOpen={!!deleteHabitTargetId}
+          title="Delete Habit"
+          description="Are you sure you want to delete this habit? Routine streaks and historical log data for this habit will be removed."
+          confirmLabel="Delete"
+          onConfirm={confirmDeleteHabit}
+          onCancel={() => setDeleteHabitTargetId(null)}
+        />
 
         {/* Create Habit Modal */}
         {isModalOpen && (

@@ -20,6 +20,8 @@ import { GlassInput } from "@/components/ui/GlassInput";
 import { GlassBadge } from "@/components/ui/GlassBadge";
 import { ListSkeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useToast } from "@/components/providers/ToastProvider";
 import { PrioritySortStrategy, DueDateSortStrategy, CreatedDateSortStrategy } from "@/lib/patterns/strategies/SortStrategy";
 import { Task } from "@/models/domain/Task";
 
@@ -36,15 +38,21 @@ interface TaskItem {
 }
 
 export default function TasksPage() {
+  const { showToast } = useToast();
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+
+  // Filters & Sorting State
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "completed">("all");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [sortStrategy, setSortStrategy] = useState<"priority" | "dueDate" | "createdAt">("priority");
 
-  // Create Modal State
+  // Modal & Confirmation State
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+
+  // Form State
   const [newTitle, setNewTitle] = useState("");
   const [newDesc, setNewDesc] = useState("");
   const [newPriority, setNewPriority] = useState<"low" | "medium" | "high" | "urgent">("medium");
@@ -143,6 +151,12 @@ export default function TasksPage() {
       prev.map((t) => (t.id === id ? { ...t, status: nextStatus } : t))
     );
 
+    showToast(
+      nextStatus === "completed" ? "Task Completed" : "Task Re-opened",
+      undefined,
+      "success"
+    );
+
     try {
       await fetch(`/api/tasks/${id}`, {
         method: "PATCH",
@@ -155,9 +169,15 @@ export default function TasksPage() {
     }
   };
 
-  // Delete Task
-  const deleteTask = async (id: string) => {
+  // Delete Task Confirmation
+  const confirmDeleteTask = async () => {
+    if (!deleteTargetId) return;
+    const id = deleteTargetId;
+    setDeleteTargetId(null);
+
     setTasks((prev) => prev.filter((t) => t.id !== id));
+    showToast("Task Deleted", undefined, "info");
+
     try {
       await fetch(`/api/tasks/${id}`, { method: "DELETE" });
     } catch (err) {
@@ -350,7 +370,7 @@ export default function TasksPage() {
                     )}
 
                     <button
-                      onClick={() => deleteTask(task.id)}
+                      onClick={() => setDeleteTargetId(task.id)}
                       className="p-1.5 rounded-lg text-muted hover:text-destructive hover:bg-destructive/10 transition-colors opacity-0 group-hover:opacity-100"
                       title="Delete Task"
                     >
@@ -362,6 +382,16 @@ export default function TasksPage() {
             })}
           </div>
         )}
+
+        {/* Delete Confirmation Modal */}
+        <ConfirmDialog
+          isOpen={!!deleteTargetId}
+          title="Delete Task"
+          description="Are you sure you want to delete this task? This action cannot be undone."
+          confirmLabel="Delete"
+          onConfirm={confirmDeleteTask}
+          onCancel={() => setDeleteTargetId(null)}
+        />
 
         {/* Create Task Modal Overlay */}
         {isModalOpen && (

@@ -10,6 +10,8 @@ import { GlassButton } from "@/components/ui/GlassButton";
 import { GlassInput } from "@/components/ui/GlassInput";
 import { ListSkeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useToast } from "@/components/providers/ToastProvider";
 
 interface NoteItem {
   id: string;
@@ -22,8 +24,10 @@ interface NoteItem {
 }
 
 export default function NotesPage() {
+  const { showToast } = useToast();
   const [notes, setNotes] = useState<NoteItem[]>([]);
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
+  const [deleteNoteTargetId, setDeleteNoteTargetId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
@@ -79,6 +83,7 @@ export default function NotesPage() {
       if (data.success) {
         setNotes((prev) => [data.data, ...prev]);
         selectNote(data.data);
+        showToast("Note Created", undefined, "success");
       }
     } catch (err) {
       console.error(err);
@@ -110,6 +115,7 @@ export default function NotesPage() {
         setNotes((prev) =>
           prev.map((n) => (n.id === selectedNoteId ? data.data : n))
         );
+        showToast("Note Saved", undefined, "success");
       }
     } catch (err) {
       console.error(err);
@@ -118,11 +124,17 @@ export default function NotesPage() {
     }
   };
 
-  const handleDeleteNote = async (id: string) => {
+  const confirmDeleteNote = async () => {
+    if (!deleteNoteTargetId) return;
+    const id = deleteNoteTargetId;
+    setDeleteNoteTargetId(null);
+
     setNotes((prev) => prev.filter((n) => n.id !== id));
     if (selectedNoteId === id) {
       setSelectedNoteId(null);
     }
+    showToast("Note Deleted", undefined, "info");
+
     try {
       await fetch(`/api/notes/${id}`, { method: "DELETE" });
     } catch (err) {
@@ -199,7 +211,7 @@ export default function NotesPage() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleDeleteNote(note.id);
+                          setDeleteNoteTargetId(note.id);
                         }}
                         className="p-1 rounded text-muted hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
                       >
@@ -260,6 +272,16 @@ export default function NotesPage() {
             </div>
           </div>
         )}
+
+        {/* Delete Confirmation Modal */}
+        <ConfirmDialog
+          isOpen={!!deleteNoteTargetId}
+          title="Delete Note"
+          description="Are you sure you want to delete this note? This action cannot be undone."
+          confirmLabel="Delete"
+          onConfirm={confirmDeleteNote}
+          onCancel={() => setDeleteNoteTargetId(null)}
+        />
       </PageContainer>
     </AppShell>
   );

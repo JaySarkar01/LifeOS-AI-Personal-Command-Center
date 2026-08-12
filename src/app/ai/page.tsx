@@ -15,7 +15,10 @@ import { AIPlanPreview } from "@/components/ai/AIPlanPreview";
 import { AIError } from "@/components/ai/AIError";
 import { ChatMessage, LifeOSTodayContext, AITaskPlanResult, AITaskPlanItem } from "@/services/ai/types/ai";
 
+import { useToast } from "@/components/providers/ToastProvider";
+
 export default function AIPage() {
+  const { showToast } = useToast();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -128,6 +131,7 @@ export default function AIPage() {
       }
       setProposedPlan(null);
       loadDashboardContext();
+      showToast("Tasks Added to Workspace", `${selectedTasks.length} tasks added`, "success");
 
       const confirmMsg: ChatMessage = {
         id: `msg_ai_${crypto.randomUUID()}`,

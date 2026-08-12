@@ -3,6 +3,7 @@ import { Outfit, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ui/ThemeProvider";
 import { AuthProvider } from "@/components/providers/AuthProvider";
+import { ToastProvider } from "@/components/providers/ToastProvider";
 
 const fontDisplay = Outfit({
   variable: "--font-display",
@@ -17,8 +18,16 @@ const fontBody = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "LifeOS — AI Personal Command Center",
-  description: "A calm, intelligent personal operating system.",
+  title: {
+    default: "LifeOS — AI Personal Command Center",
+    template: "LifeOS — %s",
+  },
+  description: "A calm, intelligent personal operating system powered by Gemini AI.",
+  openGraph: {
+    title: "LifeOS — AI Personal Command Center",
+    description: "A calm, intelligent personal operating system.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -56,7 +65,9 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col font-sans antialiased text-foreground bg-background">
         <AuthProvider>
-          <ThemeProvider>{children}</ThemeProvider>
+          <ThemeProvider>
+            <ToastProvider>{children}</ToastProvider>
+          </ThemeProvider>
         </AuthProvider>
       </body>
     </html>
