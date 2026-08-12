@@ -29,7 +29,7 @@ export interface SidebarProps {
 
 export function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps) {
   const navItems: NavItemConfig[] = [
-    { id: "dash", label: "Overview", icon: LayoutDashboard, href: "/", section: "PRODUCTIVITY" },
+    { id: "dash", label: "Overview", icon: LayoutDashboard, href: "/dashboard", section: "PRODUCTIVITY" },
     { id: "tasks", label: "Tasks", icon: CheckSquare, href: "/tasks", section: "PRODUCTIVITY" },
     { id: "habits", label: "Habits", icon: Repeat, href: "/habits", section: "PRODUCTIVITY" },
     { id: "sched", label: "Schedule", icon: Calendar, href: "/schedule", section: "PRODUCTIVITY" },

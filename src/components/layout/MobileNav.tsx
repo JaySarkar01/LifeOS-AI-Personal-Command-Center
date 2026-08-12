@@ -24,7 +24,7 @@ export function MobileNav() {
   const pathname = usePathname();
 
   const items: DockItem[] = [
-    { id: "dash", label: "Overview", href: "/", icon: LayoutDashboard },
+    { id: "dash", label: "Overview", href: "/dashboard", icon: LayoutDashboard },
     { id: "tasks", label: "Tasks", href: "/tasks", icon: CheckSquare },
     { id: "habits", label: "Habits", href: "/habits", icon: Repeat },
     { id: "notes", label: "Notes", href: "/notes", icon: StickyNote },

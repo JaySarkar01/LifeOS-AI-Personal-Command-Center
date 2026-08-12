@@ -94,7 +94,7 @@ export function TopBar({ onOpenCommandPalette, onOpenMobileDrawer }: TopBarProps
                 </Link>
 
                 <button
-                  onClick={() => signOut({ callbackUrl: "/login" })}
+                  onClick={() => signOut({ callbackUrl: "/" })}
                   className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-destructive hover:bg-destructive/10 transition-colors text-left w-full cursor-pointer"
                 >
                   <LogOut className="w-4 h-4 text-destructive" />
