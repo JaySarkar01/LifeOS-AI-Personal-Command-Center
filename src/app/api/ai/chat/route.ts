@@ -26,12 +26,33 @@ export async function POST(req: Request) {
     const context = await LifeOSContextService.getTodayContext(userId);
     const responseText = await GeminiService.generateChatResponse(userId, prompt, context, history);
 
+    let content = responseText;
+    let suggestedAction = null;
+
+    try {
+      const cleaned = responseText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+      const parsed = JSON.parse(cleaned);
+      if (parsed && typeof parsed === "object" && "content" in parsed) {
+        content = parsed.content;
+        if (parsed.suggestedAction) {
+          suggestedAction = {
+            type: parsed.suggestedAction.type,
+            status: "pending",
+            data: parsed.suggestedAction.data,
+          };
+        }
+      }
+    } catch {
+      // Parsing failed, response is plain text
+    }
+
     return NextResponse.json({
       success: true,
       data: {
         role: "model",
-        content: responseText,
+        content,
         timestamp: new Date().toISOString(),
+        ...(suggestedAction ? { suggestedAction } : {}),
       },
     });
   } catch (err: unknown) {

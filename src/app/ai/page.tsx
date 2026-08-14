@@ -104,6 +104,7 @@ export default function AIPage() {
           role: "model",
           content: data.data.content,
           timestamp: data.data.timestamp,
+          suggestedAction: data.data.suggestedAction,
         };
         setMessages((prev) => [...prev, aiMsg]);
       } else {
@@ -145,6 +146,61 @@ export default function AIPage() {
     }
   };
 
+  const handleConfirmSuggestedAction = async (messageId: string) => {
+    const msg = messages.find((m) => m.id === messageId);
+    if (!msg || !msg.suggestedAction || msg.suggestedAction.type !== "CREATE_TASK") return;
+
+    const { title, dueDate, priority } = msg.suggestedAction.data;
+    try {
+      const res = await fetch("/api/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, dueDate, priority }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === messageId && m.suggestedAction
+              ? {
+                  ...m,
+                  suggestedAction: {
+                    ...m.suggestedAction,
+                    status: "confirmed",
+                  },
+                }
+              : m
+          )
+        );
+        loadDashboardContext();
+        showToast("Task Created", `"${title}" has been added.`, "success");
+      } else {
+        showToast("Error", data.error?.message || "Failed to create task", "error");
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("Error", "Could not complete request.", "error");
+    }
+  };
+
+  const handleCancelSuggestedAction = (messageId: string) => {
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.id === messageId && m.suggestedAction
+          ? {
+              ...m,
+              suggestedAction: {
+                ...m.suggestedAction,
+                status: "cancelled",
+              },
+            }
+          : m
+      )
+    );
+    showToast("Action Cancelled", "Task suggestion discarded.", "info");
+  };
+
   const handleClear = () => {
     setMessages([]);
     setError(null);
@@ -183,6 +239,8 @@ export default function AIPage() {
                       key={msg.id}
                       message={msg}
                       onRetry={msg.role === "model" ? () => handleSendMessage(messages[messages.length - 2]?.content || "") : undefined}
+                      onConfirmSuggestedAction={handleConfirmSuggestedAction}
+                      onCancelSuggestedAction={handleCancelSuggestedAction}
                     />
                   ))
                 )}

@@ -1,8 +1,19 @@
+export interface SuggestedAction {
+  type: "CREATE_TASK";
+  status: "pending" | "confirmed" | "cancelled";
+  data: {
+    title: string;
+    dueDate?: string; // YYYY-MM-DD
+    priority?: string;
+  };
+}
+
 export interface ChatMessage {
   id: string;
   role: "user" | "model" | "system";
   content: string;
   timestamp: string;
+  suggestedAction?: SuggestedAction;
 }
 
 export interface LifeOSTodayContext {

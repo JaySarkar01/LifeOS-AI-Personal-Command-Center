@@ -2,13 +2,21 @@ import React, { useState } from "react";
 import { Sparkles, User, Copy, Check, RotateCcw } from "lucide-react";
 import { GlassPanel } from "@/components/ui/GlassPanel";
 import { ChatMessage } from "@/services/ai/types/ai";
+import { AISuggestedAction } from "./AISuggestedAction";
 
 interface AIMessageProps {
   message: ChatMessage;
   onRetry?: () => void;
+  onConfirmSuggestedAction?: (messageId: string) => Promise<void>;
+  onCancelSuggestedAction?: (messageId: string) => void;
 }
 
-export function AIMessage({ message, onRetry }: AIMessageProps) {
+export function AIMessage({
+  message,
+  onRetry,
+  onConfirmSuggestedAction,
+  onCancelSuggestedAction,
+}: AIMessageProps) {
   const isUser = message.role === "user";
   const [copied, setCopied] = useState(false);
 
@@ -67,6 +75,22 @@ export function AIMessage({ message, onRetry }: AIMessageProps) {
         <div className="text-xs md:text-sm leading-relaxed whitespace-pre-wrap font-sans">
           {message.content}
         </div>
+
+        {message.suggestedAction && (
+          <AISuggestedAction
+            action={message.suggestedAction}
+            onConfirm={async () => {
+              if (onConfirmSuggestedAction) {
+                await onConfirmSuggestedAction(message.id);
+              }
+            }}
+            onCancel={() => {
+              if (onCancelSuggestedAction) {
+                onCancelSuggestedAction(message.id);
+              }
+            }}
+          />
+        )}
       </GlassPanel>
     </div>
   );

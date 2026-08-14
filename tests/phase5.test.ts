@@ -54,6 +54,28 @@ async function runPhase5Tests() {
   assert.strictEqual(rateLimitHit, true, "Rate limit should trigger after max requests per minute");
   console.log("✅ Rate Limiter Guard passed!");
 
+  // 5. Suggested Action Intent Parsing Test
+  console.log("\nTesting Suggested Action Intent Parsing...");
+  
+  const testPrompt1 = "Create a task called Finish LifeOS tomorrow.";
+  const intent1 = GeminiService.parseTaskCreationIntent(testPrompt1, "2026-08-14");
+  assert.ok(intent1, "Should successfully parse task creation intent");
+  assert.strictEqual(intent1.title, "Finish LifeOS");
+  assert.strictEqual(intent1.dueDate, "2026-08-15");
+  assert.strictEqual(intent1.priority, "medium");
+
+  const testPrompt2 = "add a task called Write Report";
+  const intent2 = GeminiService.parseTaskCreationIntent(testPrompt2, "2026-08-14");
+  assert.ok(intent2, "Should successfully parse task creation intent without due date");
+  assert.strictEqual(intent2.title, "Write Report");
+  assert.strictEqual(intent2.dueDate, "2026-08-14"); // default to today
+
+  const testPrompt3 = "What is the weather today?";
+  const intent3 = GeminiService.parseTaskCreationIntent(testPrompt3, "2026-08-14");
+  assert.strictEqual(intent3, null, "Should not parse general questions as task intent");
+
+  console.log("✅ Suggested Action Intent Parsing passed!");
+
   console.log("\n🎉 ALL LIFEOS PHASE 5 GEMINI AI TESTS PASSED SUCCESSFULLY!\n");
 }
 

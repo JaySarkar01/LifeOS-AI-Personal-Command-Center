@@ -47,6 +47,49 @@ export class GeminiService {
     }
   }
 
+  public static parseTaskCreationIntent(prompt: string, todayDateStr: string) {
+    let cleaned = prompt.trim().replace(/\.$/, "");
+    
+    // Check if it's a task creation intent
+    const isTaskCreation = /^(?:create|add)\s+(?:a\s+)?task\s+(?:called\s+)?/i.test(cleaned);
+    if (!isTaskCreation) return null;
+    
+    // Remove the prefix
+    cleaned = cleaned.replace(/^(?:create|add)\s+(?:a\s+)?task\s+(?:called\s+)?/i, "");
+    
+    // Remove wrapping quotes if present
+    cleaned = cleaned.replace(/^["']|["']$/g, "").trim();
+    
+    // Check for suffix " tomorrow" or " today"
+    let when = "";
+    if (cleaned.toLowerCase().endsWith(" tomorrow")) {
+      when = "tomorrow";
+      cleaned = cleaned.substring(0, cleaned.length - " tomorrow".length).trim();
+    } else if (cleaned.toLowerCase().endsWith(" today")) {
+      when = "today";
+      cleaned = cleaned.substring(0, cleaned.length - " today".length).trim();
+    }
+    
+    // Clean any trailing quotes after removing suffix
+    const title = cleaned.replace(/^["']|["']$/g, "").trim();
+    
+    let dueDate = todayDateStr;
+    if (when === "tomorrow") {
+      const date = new Date(todayDateStr + "T00:00:00");
+      date.setDate(date.getDate() + 1);
+      const yyyy = date.getFullYear();
+      const mm = String(date.getMonth() + 1).padStart(2, "0");
+      const dd = String(date.getDate()).padStart(2, "0");
+      dueDate = `${yyyy}-${mm}-${dd}`;
+    }
+    
+    return {
+      title,
+      dueDate,
+      priority: "medium",
+    };
+  }
+
   /**
    * Generates conversational AI chat response with context awareness.
    */
@@ -64,6 +107,23 @@ export class GeminiService {
     const contextSnippet = wrapUntrustedContent("USER_LIFEOS_CONTEXT", JSON.stringify(context, null, 2));
 
     if (!ai) {
+      // Check if task creation intent is present in the prompt
+      const todayDateStr = context.date || new Date().toISOString().split("T")[0];
+      const taskIntent = this.parseTaskCreationIntent(userPrompt, todayDateStr);
+      if (taskIntent) {
+        return JSON.stringify({
+          content: `[LifeOS Intelligence Demo Mode] I have prepared a suggested action to create the task "${taskIntent.title}".`,
+          suggestedAction: {
+            type: "CREATE_TASK",
+            data: {
+              title: taskIntent.title,
+              dueDate: taskIntent.dueDate,
+              priority: taskIntent.priority,
+            },
+          },
+        });
+      }
+
       // Graceful fallback response when API key is unconfigured
       return `[LifeOS Intelligence Demo Mode]\n\nBased on your current context (${context.tasks.length} tasks, ${context.habits.length} habits):\nYour top focus should be: "${context.tasks[0]?.title || "Review your daily goals"}". You have ${context.schedule.length} events scheduled today.`;
     }
