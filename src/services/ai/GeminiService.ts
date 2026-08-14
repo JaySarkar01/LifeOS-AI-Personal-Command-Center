@@ -90,6 +90,222 @@ export class GeminiService {
     };
   }
 
+  public static parseWorkspaceActionIntent(prompt: string, todayDateStr: string) {
+    const raw = prompt.trim();
+    const cleaned = raw.replace(/\.$/, "");
+
+    // 1. Multi-task breakdown intent
+    const breakMatch = cleaned.match(/break(?:\s+my)?\s+(.+?)\s+into\s+(?:(\d+|two|three|four|five)\s+)?tasks/i);
+    if (breakMatch) {
+      const topic = breakMatch[1].replace(/^the\s+/i, "").trim();
+      const numWord = breakMatch[2]?.toLowerCase();
+      let count = 3;
+      if (numWord === "two") count = 2;
+      else if (numWord === "three") count = 3;
+      else if (numWord === "four") count = 4;
+      else if (numWord === "five") count = 5;
+      else if (numWord && !isNaN(parseInt(numWord, 10))) count = parseInt(numWord, 10);
+
+      const tasks = [
+        `Design architecture for ${topic}`,
+        `Implement core modules for ${topic}`,
+        `Write automated tests and validation for ${topic}`,
+        `Deploy and verify ${topic}`,
+        `Review performance metrics for ${topic}`,
+      ].slice(0, Math.max(2, Math.min(count, 5)));
+
+      return {
+        content: `I've proposed a breakdown of ${tasks.length} actionable tasks for "${topic}".`,
+        actions: tasks.map((t) => ({
+          type: "CREATE_TASK" as const,
+          entityType: "task" as const,
+          payload: { title: t, priority: "medium" as const, dueDate: todayDateStr },
+          reason: `Breakdown step for ${topic}`,
+          requiresConfirmation: true,
+        })),
+      };
+    }
+
+    // 2. Task creation intent (calls existing parseTaskCreationIntent for compatibility)
+    const taskCreate = this.parseTaskCreationIntent(prompt, todayDateStr);
+    if (taskCreate) {
+      return {
+        content: `I have prepared a suggested action to create the task "${taskCreate.title}".`,
+        actions: [
+          {
+            type: "CREATE_TASK" as const,
+            entityType: "task" as const,
+            payload: {
+              title: taskCreate.title,
+              dueDate: taskCreate.dueDate,
+              priority: taskCreate.priority,
+            },
+            reason: `Create task requested by user`,
+            requiresConfirmation: true,
+          },
+        ],
+      };
+    }
+
+    // 3. Complete task intent
+    const completeTaskMatch = cleaned.match(/^(?:mark|complete)\s+(?:task\s+)?["']?(.+?)["']?\s+(?:as\s+)?complete(?:d)?$/i);
+    if (completeTaskMatch) {
+      const title = completeTaskMatch[1].trim();
+      return {
+        content: `I've prepared an action to complete the task "${title}".`,
+        actions: [
+          {
+            type: "COMPLETE_TASK" as const,
+            entityType: "task" as const,
+            payload: { title, query: title },
+            reason: `Mark task as completed`,
+            requiresConfirmation: true,
+          },
+        ],
+      };
+    }
+
+    // 4. Create Habit intent
+    const habitCreateMatch = cleaned.match(/^(?:create|add)\s+(?:a\s+)?habit\s+(?:called\s+)?["']?(.+?)["']?$/i);
+    if (habitCreateMatch) {
+      const title = habitCreateMatch[1].trim();
+      return {
+        content: `I have prepared a suggestion to create the habit "${title}".`,
+        actions: [
+          {
+            type: "CREATE_HABIT" as const,
+            entityType: "habit" as const,
+            payload: { title, frequency: "daily" as const, targetDaysPerWeek: 7 },
+            reason: `New habit tracker`,
+            requiresConfirmation: true,
+          },
+        ],
+      };
+    }
+
+    // 5. Complete Habit intent
+    const completeHabitMatch = cleaned.match(/^(?:mark|complete|log)\s+(?:my\s+)?["']?(.+?)["']?\s+(?:habit\s+)?complete(?:d)?(?:\s+today)?$/i);
+    if (completeHabitMatch) {
+      const title = completeHabitMatch[1].replace(/\s+habit$/i, "").trim();
+      return {
+        content: `I have prepared an action to mark your habit "${title}" complete for today.`,
+        actions: [
+          {
+            type: "COMPLETE_HABIT" as const,
+            entityType: "habit" as const,
+            payload: { title, query: title, date: todayDateStr },
+            reason: `Log daily habit completion`,
+            requiresConfirmation: true,
+          },
+        ],
+      };
+    }
+
+    // 6. Create Note intent
+    const noteCreateMatch = cleaned.match(/^(?:create|add)\s+(?:a\s+)?note\s+(?:called\s+)?["']?(.+?)["']?$/i);
+    if (noteCreateMatch) {
+      const title = noteCreateMatch[1].trim();
+      return {
+        content: `I have prepared a suggestion to create the note "${title}".`,
+        actions: [
+          {
+            type: "CREATE_NOTE" as const,
+            entityType: "note" as const,
+            payload: { title, content: "", type: "quick" as const },
+            reason: `Create workspace note`,
+            requiresConfirmation: true,
+          },
+        ],
+      };
+    }
+
+    // 7. Create Goal intent
+    const goalCreateMatch = cleaned.match(/^(?:create|add)\s+(?:a\s+)?goal\s+(?:to\s+|called\s+)?["']?(.+?)["']?$/i);
+    if (goalCreateMatch) {
+      const title = goalCreateMatch[1].trim();
+      return {
+        content: `I have prepared a suggestion to create the goal "${title}".`,
+        actions: [
+          {
+            type: "CREATE_GOAL" as const,
+            entityType: "goal" as const,
+            payload: { title, status: "in_progress" as const },
+            reason: `Create life goal`,
+            requiresConfirmation: true,
+          },
+        ],
+      };
+    }
+
+    // 8. Event Creation intent (Schedule ...)
+    if (/^(?:schedule|create\s+(?:an\s+)?event)\b/i.test(cleaned)) {
+      let target = cleaned.replace(/^(?:schedule|create\s+(?:an\s+)?event)\s+/i, "");
+      let when = "today";
+      if (/\btomorrow\b/i.test(target)) {
+        when = "tomorrow";
+        target = target.replace(/\btomorrow\b/i, "");
+      } else if (/\btoday\b/i.test(target)) {
+        when = "today";
+        target = target.replace(/\btoday\b/i, "");
+      }
+
+      const timeMatch = target.match(/\bat\s+(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)/i);
+      if (timeMatch) {
+        target = target.replace(timeMatch[0], "");
+      }
+
+      target = target.replace(/^["']|["']$/g, "").trim();
+      let dateStr = todayDateStr;
+      if (when === "tomorrow") {
+        const d = new Date(todayDateStr + "T00:00:00");
+        d.setDate(d.getDate() + 1);
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, "0");
+        const dd = String(d.getDate()).padStart(2, "0");
+        dateStr = `${yyyy}-${mm}-${dd}`;
+      }
+      const startTime = `${dateStr}T10:00:00`;
+      const endTime = `${dateStr}T11:00:00`;
+
+      return {
+        content: `I have prepared an event proposal for "${target}" on ${when}.`,
+        actions: [
+          {
+            type: "CREATE_EVENT" as const,
+            entityType: "event" as const,
+            payload: { title: target, startTime, endTime, type: "focus_session" as const },
+            reason: `Schedule focus session`,
+            requiresConfirmation: true,
+          },
+        ],
+      };
+    }
+
+    // 9. Delete Event intent
+    if (/^(?:delete|remove)\b/i.test(cleaned) && (/\bevent\b/i.test(cleaned) || /\bsession\b/i.test(cleaned))) {
+      let target = cleaned.replace(/^(?:delete|remove)\s+/i, "");
+      target = target.replace(/^(?:tomorrow|today)(?:['’]?s)?\s+/i, "");
+      target = target.replace(/^(?:the\s+)?event\s+(?:called\s+)?/i, "");
+      target = target.replace(/\s+event$/i, "");
+      target = target.replace(/^["']|["']$/g, "").trim();
+
+      return {
+        content: `I have prepared a request to delete the event "${target}". This action requires explicit confirmation.`,
+        actions: [
+          {
+            type: "DELETE_EVENT" as const,
+            entityType: "event" as const,
+            payload: { title: target, query: target },
+            reason: `Delete scheduled event`,
+            requiresConfirmation: true,
+          },
+        ],
+      };
+    }
+
+    return null;
+  }
+
   /**
    * Generates conversational AI chat response with context awareness.
    */
@@ -107,20 +323,20 @@ export class GeminiService {
     const contextSnippet = wrapUntrustedContent("USER_LIFEOS_CONTEXT", JSON.stringify(context, null, 2));
 
     if (!ai) {
-      // Check if task creation intent is present in the prompt
+      // Check if action intent is present in the prompt
       const todayDateStr = context.date || new Date().toISOString().split("T")[0];
-      const taskIntent = this.parseTaskCreationIntent(userPrompt, todayDateStr);
-      if (taskIntent) {
+      const actionIntent = this.parseWorkspaceActionIntent(userPrompt, todayDateStr);
+      if (actionIntent) {
         return JSON.stringify({
-          content: `[LifeOS Intelligence Demo Mode] I have prepared a suggested action to create the task "${taskIntent.title}".`,
-          suggestedAction: {
-            type: "CREATE_TASK",
-            data: {
-              title: taskIntent.title,
-              dueDate: taskIntent.dueDate,
-              priority: taskIntent.priority,
-            },
-          },
+          content: `[LifeOS Intelligence Demo Mode] ${actionIntent.content}`,
+          actions: actionIntent.actions,
+          suggestedAction: actionIntent.actions[0]
+            ? {
+                type: actionIntent.actions[0].type,
+                status: "pending",
+                data: actionIntent.actions[0].payload,
+              }
+            : undefined,
         });
       }
 

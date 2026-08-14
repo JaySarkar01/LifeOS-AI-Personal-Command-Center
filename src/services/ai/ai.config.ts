@@ -9,4 +9,5 @@ export const AI_CONFIG = {
   rateLimitWindowMs: 60000, // 1 minute
   maxChatRequestsPerMinute: 20,
   maxInsightRequestsPerHour: 30,
+  maxActionExecutionsPerMinute: 10,
 };

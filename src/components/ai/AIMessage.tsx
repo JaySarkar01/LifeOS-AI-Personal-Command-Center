@@ -1,14 +1,19 @@
 import React, { useState } from "react";
 import { Sparkles, User, Copy, Check, RotateCcw } from "lucide-react";
 import { GlassPanel } from "@/components/ui/GlassPanel";
-import { ChatMessage } from "@/services/ai/types/ai";
+import { ChatMessage, AIActionItem } from "@/services/ai/types/ai";
+import { AIActionType } from "@/models/domain/AIAction";
 import { AISuggestedAction } from "./AISuggestedAction";
+import { AIActionPreview } from "./AIActionPreview";
 
 interface AIMessageProps {
   message: ChatMessage;
   onRetry?: () => void;
   onConfirmSuggestedAction?: (messageId: string) => Promise<void>;
   onCancelSuggestedAction?: (messageId: string) => void;
+  onConfirmActions?: (messageId: string, actions: AIActionItem[]) => Promise<void>;
+  onCancelActions?: (messageId: string) => void;
+  onUndoAction?: (actionType: AIActionType, entityId: string) => Promise<void>;
 }
 
 export function AIMessage({
@@ -16,6 +21,9 @@ export function AIMessage({
   onRetry,
   onConfirmSuggestedAction,
   onCancelSuggestedAction,
+  onConfirmActions,
+  onCancelActions,
+  onUndoAction,
 }: AIMessageProps) {
   const isUser = message.role === "user";
   const [copied, setCopied] = useState(false);
@@ -76,7 +84,22 @@ export function AIMessage({
           {message.content}
         </div>
 
-        {message.suggestedAction && (
+        {message.actions && message.actions.length > 0 ? (
+          <AIActionPreview
+            actions={message.actions}
+            onConfirmActions={async (selected) => {
+              if (onConfirmActions) {
+                await onConfirmActions(message.id, selected);
+              }
+            }}
+            onCancelActions={() => {
+              if (onCancelActions) {
+                onCancelActions(message.id);
+              }
+            }}
+            onUndoAction={onUndoAction}
+          />
+        ) : message.suggestedAction ? (
           <AISuggestedAction
             action={message.suggestedAction}
             onConfirm={async () => {
@@ -90,7 +113,7 @@ export function AIMessage({
               }
             }}
           />
-        )}
+        ) : null}
       </GlassPanel>
     </div>
   );

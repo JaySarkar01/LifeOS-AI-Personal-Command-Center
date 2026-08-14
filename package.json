@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "npx tsx tests/domain.test.ts && npx tsx tests/phase4.test.ts && npx tsx tests/phase5.test.ts"
+    "test": "npx tsx tests/domain.test.ts && npx tsx tests/phase4.test.ts && npx tsx tests/phase5.test.ts && npx tsx tests/phase8_actions.test.ts"
   },
   "dependencies": {
     "@google/genai": "^2.16.0",

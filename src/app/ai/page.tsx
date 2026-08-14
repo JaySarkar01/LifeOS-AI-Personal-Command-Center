@@ -13,7 +13,7 @@ import { AIContextPanel } from "@/components/ai/AIContextPanel";
 import { AIThinking } from "@/components/ai/AIThinking";
 import { AIPlanPreview } from "@/components/ai/AIPlanPreview";
 import { AIError } from "@/components/ai/AIError";
-import { ChatMessage, LifeOSTodayContext, AITaskPlanResult, AITaskPlanItem } from "@/services/ai/types/ai";
+import { ChatMessage, LifeOSTodayContext, AITaskPlanResult, AITaskPlanItem, AIActionItem } from "@/services/ai/types/ai";
 
 import { useToast } from "@/components/providers/ToastProvider";
 
@@ -105,6 +105,7 @@ export default function AIPage() {
           content: data.data.content,
           timestamp: data.data.timestamp,
           suggestedAction: data.data.suggestedAction,
+          actions: data.data.actions,
         };
         setMessages((prev) => [...prev, aiMsg]);
       } else {
@@ -120,16 +121,22 @@ export default function AIPage() {
 
   const handleConfirmAddTasks = async (selectedTasks: AITaskPlanItem[]) => {
     try {
-      for (const task of selectedTasks) {
-        await fetch("/api/tasks", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            title: task.title,
-            priority: task.priority,
-          }),
-        });
-      }
+      const actions = selectedTasks.map((t) => ({
+        type: "CREATE_TASK" as const,
+        entityType: "task" as const,
+        payload: {
+          title: t.title,
+          priority: t.priority,
+        },
+        reason: t.reason,
+      }));
+
+      await fetch("/api/ai/actions/execute", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ actions }),
+      });
+
       setProposedPlan(null);
       loadDashboardContext();
       showToast("Tasks Added to Workspace", `${selectedTasks.length} tasks added`, "success");
@@ -148,57 +155,125 @@ export default function AIPage() {
 
   const handleConfirmSuggestedAction = async (messageId: string) => {
     const msg = messages.find((m) => m.id === messageId);
-    if (!msg || !msg.suggestedAction || msg.suggestedAction.type !== "CREATE_TASK") return;
+    if (!msg) return;
 
-    const { title, dueDate, priority } = msg.suggestedAction.data;
+    let actionToExecute: Record<string, unknown> | null = null;
+    if (msg.actions && msg.actions.length > 0) {
+      actionToExecute = msg.actions[0] as unknown as Record<string, unknown>;
+    } else if (msg.suggestedAction) {
+      actionToExecute = {
+        type: msg.suggestedAction.type,
+        entityType: msg.suggestedAction.entityType || "task",
+        payload: msg.suggestedAction.data,
+      };
+    }
+
+    if (!actionToExecute) return;
+
     try {
-      const res = await fetch("/api/tasks", {
+      const res = await fetch("/api/ai/actions/execute", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, dueDate, priority }),
+        body: JSON.stringify({ action: actionToExecute }),
       });
 
       const data = await res.json();
       if (data.success) {
         setMessages((prev) =>
           prev.map((m) =>
-            m.id === messageId && m.suggestedAction
+            m.id === messageId
               ? {
                   ...m,
-                  suggestedAction: {
-                    ...m.suggestedAction,
-                    status: "confirmed",
-                  },
+                  suggestedAction: m.suggestedAction
+                    ? { ...m.suggestedAction, status: "confirmed" }
+                    : undefined,
+                  actions: m.actions
+                    ? m.actions.map((a) => ({ ...a, status: "success", resultEntityId: data.data?.entityId }))
+                    : undefined,
                 }
               : m
           )
         );
         loadDashboardContext();
-        showToast("Task Created", `"${title}" has been added.`, "success");
+        showToast("Action Confirmed", data.data?.message || "Action executed successfully.", "success");
       } else {
-        showToast("Error", data.error?.message || "Failed to create task", "error");
+        showToast("Action Failed", data.error?.message || "Failed to execute action", "error");
+      }
+    } catch (err) {
+      console.error("Failed to confirm action:", err);
+      showToast("Error", "Could not complete action request.", "error");
+    }
+  };
+
+  const handleConfirmActions = async (messageId: string, selectedActions: AIActionItem[]) => {
+    try {
+      const res = await fetch("/api/ai/actions/execute", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          actions: selectedActions.map((a) => ({
+            type: a.type,
+            entityType: a.entityType,
+            payload: a.payload,
+            reason: a.reason,
+          })),
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === messageId && m.actions
+              ? {
+                  ...m,
+                  actions: m.actions.map((a) => {
+                    const found = selectedActions.find((sa) => sa.id === a.id || sa.type === a.type);
+                    return found ? { ...a, status: "success" } : a;
+                  }),
+                }
+              : m
+          )
+        );
+        loadDashboardContext();
+        showToast("Actions Executed", `Successfully applied ${selectedActions.length} workspace actions.`, "success");
+      } else {
+        showToast("Action Execution Failed", data.error?.message || "Error processing actions", "error");
       }
     } catch (err) {
       console.error(err);
-      showToast("Error", "Could not complete request.", "error");
+      showToast("Error", "Failed to communicate with action server.", "error");
     }
   };
 
   const handleCancelSuggestedAction = (messageId: string) => {
     setMessages((prev) =>
       prev.map((m) =>
-        m.id === messageId && m.suggestedAction
+        m.id === messageId
           ? {
               ...m,
-              suggestedAction: {
-                ...m.suggestedAction,
-                status: "cancelled",
-              },
+              suggestedAction: m.suggestedAction
+                ? { ...m.suggestedAction, status: "cancelled" }
+                : undefined,
+              actions: m.actions
+                ? m.actions.map((a) => ({ ...a, status: "cancelled" }))
+                : undefined,
             }
           : m
       )
     );
-    showToast("Action Cancelled", "Task suggestion discarded.", "info");
+    showToast("Action Cancelled", "Action proposal discarded.", "info");
+  };
+
+  const handleUndoAction = async (_actionType: unknown, entityId: string) => {
+    try {
+      await fetch(`/api/tasks/${entityId}`, { method: "DELETE" });
+      loadDashboardContext();
+      showToast("Action Undone", "Reversed workspace action.", "info");
+    } catch (err) {
+      console.error("Undo failed:", err);
+      showToast("Undo Error", "Failed to undo action.", "error");
+    }
   };
 
   const handleClear = () => {
@@ -240,7 +315,10 @@ export default function AIPage() {
                       message={msg}
                       onRetry={msg.role === "model" ? () => handleSendMessage(messages[messages.length - 2]?.content || "") : undefined}
                       onConfirmSuggestedAction={handleConfirmSuggestedAction}
-                      onCancelSuggestedAction={handleCancelSuggestedAction}
+                      onCancelSuggestedAction={() => handleCancelSuggestedAction(msg.id)}
+                      onConfirmActions={(msgId, selected) => handleConfirmActions(msgId, selected)}
+                      onCancelActions={() => handleCancelSuggestedAction(msg.id)}
+                      onUndoAction={handleUndoAction}
                     />
                   ))
                 )}

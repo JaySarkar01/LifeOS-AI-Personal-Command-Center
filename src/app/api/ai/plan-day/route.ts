@@ -22,8 +22,27 @@ export async function POST(req: Request) {
 
     const context = await LifeOSContextService.getTodayContext(userId);
     const plan = await GeminiService.generateDayPlan(userId, context, availableHours, focusPreference);
+    const todayStr = context.date || new Date().toISOString().split("T")[0];
+    const actions = plan.blocks.map((b) => ({
+      type: "CREATE_EVENT" as const,
+      entityType: "event" as const,
+      payload: {
+        title: b.title,
+        startTime: `${todayStr}T${b.start}:00`,
+        endTime: `${todayStr}T${b.end}:00`,
+        type: b.type === "deep_work" ? "focus_session" : "personal",
+      },
+      reason: b.reason,
+      requiresConfirmation: true,
+    }));
 
-    return NextResponse.json({ success: true, data: plan });
+    return NextResponse.json({
+      success: true,
+      data: {
+        ...plan,
+        actions,
+      },
+    });
   } catch (err) {
     console.error("AI Plan Day Error:", err);
     return NextResponse.json({ success: false, error: "AI planning service failure" }, { status: 500 });

@@ -21,7 +21,24 @@ export async function POST(req: Request) {
     }
 
     const plan = await GeminiService.generateTaskPlan(userId, parse.data.userGoalText);
-    return NextResponse.json({ success: true, data: plan });
+    const actions = plan.suggestedTasks.map((t) => ({
+      type: "CREATE_TASK" as const,
+      entityType: "task" as const,
+      payload: {
+        title: t.title,
+        priority: t.priority,
+      },
+      reason: t.reason,
+      requiresConfirmation: true,
+    }));
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        ...plan,
+        actions,
+      },
+    });
   } catch (err) {
     console.error("AI Task Plan Error:", err);
     return NextResponse.json({ success: false, error: "AI task plan service failure" }, { status: 500 });

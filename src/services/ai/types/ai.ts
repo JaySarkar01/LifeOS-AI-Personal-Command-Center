@@ -1,11 +1,29 @@
+import { AIActionType, AIActionEntityType, AIActionStatus } from "@/models/domain/AIAction";
+
+export interface AIActionItem<T = Record<string, unknown>> {
+  id?: string;
+  type: AIActionType;
+  entityType?: AIActionEntityType;
+  payload: T;
+  reason?: string;
+  requiresConfirmation?: boolean;
+  status?: AIActionStatus;
+  resultEntityId?: string;
+}
+
 export interface SuggestedAction {
-  type: "CREATE_TASK";
-  status: "pending" | "confirmed" | "cancelled";
+  id?: string;
+  type: AIActionType | "CREATE_TASK";
+  entityType?: AIActionEntityType;
+  status?: "pending" | "confirmed" | "cancelled" | AIActionStatus;
   data: {
-    title: string;
+    title?: string;
     dueDate?: string; // YYYY-MM-DD
     priority?: string;
+    [key: string]: unknown;
   };
+  payload?: Record<string, unknown>;
+  reason?: string;
 }
 
 export interface ChatMessage {
@@ -14,6 +32,7 @@ export interface ChatMessage {
   content: string;
   timestamp: string;
   suggestedAction?: SuggestedAction;
+  actions?: AIActionItem[];
 }
 
 export interface LifeOSTodayContext {
