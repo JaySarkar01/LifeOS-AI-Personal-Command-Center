@@ -340,8 +340,12 @@ export class GeminiService {
         });
       }
 
-      // Graceful fallback response when API key is unconfigured
-      return `[LifeOS Intelligence Demo Mode]\n\nBased on your current context (${context.tasks.length} tasks, ${context.habits.length} habits):\nYour top focus should be: "${context.tasks[0]?.title || "Review your daily goals"}". You have ${context.schedule.length} events scheduled today.`;
+      // Graceful fallback response when API key is unconfigured or offline
+      if (context.tasks.length === 0 && context.habits.length === 0) {
+        return `You don't have enough workspace data yet. Create a few tasks or habits and I'll help prioritize and plan them.`;
+      }
+
+      return `Based on your current context (${context.tasks.length} tasks, ${context.habits.length} habits):\nYour top focus is: "${context.tasks[0]?.title}". You have ${context.schedule.length} events scheduled today.`;
     }
 
     try {
@@ -373,11 +377,18 @@ export class GeminiService {
     const ai = this.getAIInstance();
     const prompt = buildInsightPrompt(context);
 
-    const fallback: AIInsightResult = {
-      headline: "Protect Your Morning Focus",
-      insight: `You have ${context.tasks.length} active tasks today. Completing high-priority items first will build strong momentum.`,
-      actionableTip: "Dedicating a 90-minute block for your main task will increase throughput by 40%.",
-    };
+    const hasData = context.tasks.length > 0 || context.habits.length > 0;
+    const fallback: AIInsightResult = hasData
+      ? {
+          headline: "Focus on High-Priority Items",
+          insight: `You have ${context.tasks.length} active tasks today. Completing "${context.tasks[0]?.title || "your main task"}" first will build strong momentum.`,
+          actionableTip: "Dedicate your first focus block to your top priority task.",
+        }
+      : {
+          headline: "Welcome to LifeOS",
+          insight: "Add some workspace tasks and habits and I'll start identifying patterns.",
+          actionableTip: "Start by creating 2-3 focus tasks for your day.",
+        };
 
     if (!ai) return fallback;
 
@@ -402,12 +413,20 @@ export class GeminiService {
     const ai = this.getAIInstance();
     const prompt = buildDailySummaryPrompt(context);
 
-    const fallback: AIDailySummaryResult = {
-      summary: `You have ${context.tasks.length} active tasks and ${context.schedule.length} scheduled events today.`,
-      priorities: context.tasks.slice(0, 2).map((t) => ({ title: t.title, reason: `Priority: ${t.priority}` })),
-      warnings: [],
-      suggestions: ["Focus on completing your top priority task before noon."],
-    };
+    const hasData = context.tasks.length > 0 || context.schedule.length > 0;
+    const fallback: AIDailySummaryResult = hasData
+      ? {
+          summary: `You have ${context.tasks.length} active tasks and ${context.schedule.length} scheduled events today.`,
+          priorities: context.tasks.slice(0, 2).map((t) => ({ title: t.title, reason: `Priority: ${t.priority}` })),
+          warnings: [],
+          suggestions: ["Focus on completing your top priority task before noon."],
+        }
+      : {
+          summary: "No tasks or events are currently scheduled for today.",
+          priorities: [],
+          warnings: [],
+          suggestions: ["Add your primary tasks for today to generate a daily summary."],
+        };
 
     if (!ai) return fallback;
 

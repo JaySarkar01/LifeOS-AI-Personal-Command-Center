@@ -33,11 +33,11 @@ export function AIInsight() {
   }, [fetchInsight]);
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-accent/10 via-card to-accent-secondary/10 border border-accent/20 p-6 shadow-glass-lg backdrop-blur-2xl backdrop-saturate-150 flex flex-col justify-between min-h-[250px]">
+    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-accent/10 via-card to-accent-secondary/10 border border-accent/20 p-6 shadow-glass-lg backdrop-blur-2xl backdrop-saturate-150 flex flex-col justify-between min-h-[240px]">
       <div className="absolute top-[-30%] right-[-20%] w-[60%] h-[60%] rounded-full bg-accent/15 blur-[60px] pointer-events-none" />
       <div className="absolute bottom-[-30%] left-[-20%] w-[60%] h-[60%] rounded-full bg-accent-secondary/15 blur-[60px] pointer-events-none" />
 
-      <div className="flex flex-col gap-3.5 relative z-10">
+      <div className="flex flex-col gap-3 relative z-10">
         <div className="flex items-center justify-between">
           <span className="text-[10px] font-bold tracking-widest uppercase text-accent flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 animate-pulse" /> LIFEOS INTELLIGENCE
@@ -64,14 +64,16 @@ export function AIInsight() {
         ) : (
           <>
             <h4 className="text-sm font-bold text-foreground">
-              {insight?.headline || "Protect Your Focus Blocks"}
+              {insight?.headline || "Welcome to LifeOS"}
             </h4>
             <p className="text-xs md:text-sm leading-relaxed text-foreground/90 font-medium">
-              {insight?.insight || "Analyzing recent workspace activity to optimize your task throughput."}
+              {insight?.insight || "Add some workspace tasks and habits and I'll start identifying patterns."}
             </p>
-            <p className="text-xs text-accent font-semibold leading-relaxed">
-              💡 {insight?.actionableTip || "Dedicating a 90-minute morning focus block increases throughput by 40%."}
-            </p>
+            {insight?.actionableTip && (
+              <p className="text-xs text-accent font-semibold leading-relaxed">
+                💡 {insight.actionableTip}
+              </p>
+            )}
           </>
         )}
       </div>

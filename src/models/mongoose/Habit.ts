@@ -28,7 +28,5 @@ const HabitSchema = new Schema<IHabitDocument>(
   { timestamps: true }
 );
 
-HabitSchema.index({ userId: 1 });
-
 export const HabitModel: Model<IHabitDocument> =
   mongoose.models.Habit || mongoose.model<IHabitDocument>("Habit", HabitSchema);

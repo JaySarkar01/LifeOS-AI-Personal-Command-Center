@@ -124,9 +124,15 @@ export async function GET() {
     const overallGoalProgress = goalDocs.length > 0 ? Math.round(totalProgress / goalDocs.length) : 0;
 
     // 4. Fetch Upcoming Events
-    const eventDocs = await EventModel.find({ userId, startTime: { $gte: new Date(Date.now() - 1000 * 60 * 60 * 2) } })
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const eventDocs = await EventModel.find({
+      userId,
+      startTime: { $gte: startOfToday },
+    })
       .sort({ startTime: 1 })
-      .limit(5)
+      .limit(6)
       .lean();
 
     const events = eventDocs.map((e) => ({
@@ -136,6 +142,54 @@ export async function GET() {
       endTime: e.endTime,
       type: e.type,
     }));
+
+    // 5. Calculate Real 7-Day Weekly Productivity Overview
+    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const weeklyActivity: Array<{ day: string; date: string; score: number; active: boolean; tasksCount: number; habitsCount: number }> = [];
+
+    const now = new Date();
+    const todayDayIndex = now.getDay();
+
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split("T")[0];
+      const dayName = dayNames[d.getDay()];
+
+      const dayStart = new Date(d);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(d);
+      dayEnd.setHours(23, 59, 59, 999);
+
+      // Count tasks completed on this day
+      const completedTasksOnDay = taskDocs.filter((t) => {
+        if (t.status !== "completed") return false;
+        const updated = new Date(t.updatedAt);
+        return updated >= dayStart && updated <= dayEnd;
+      }).length;
+
+      // Count habit logs completed on this day
+      const completedHabitsOnDay = logDocs.filter((log) => {
+        const logDate = new Date(log.completedAt);
+        return logDate >= dayStart && logDate <= dayEnd;
+      }).length;
+
+      // Calculate an honest score (0-100) based on completed activity
+      const totalActivities = completedTasksOnDay + completedHabitsOnDay;
+      const score = Math.min(100, totalActivities * 25);
+
+      weeklyActivity.push({
+        day: dayName,
+        date: dateStr,
+        score,
+        active: d.getDay() === todayDayIndex,
+        tasksCount: completedTasksOnDay,
+        habitsCount: completedHabitsOnDay,
+      });
+    }
+
+    const totalWeeklyScore = weeklyActivity.reduce((acc, curr) => acc + curr.score, 0);
+    const avgWeeklyScore = Math.round(totalWeeklyScore / 7);
 
     return NextResponse.json({
       success: true,
@@ -149,7 +203,10 @@ export async function GET() {
           completedHabitsToday,
           totalHabits: habitDocs.length,
           overallGoalProgress,
+          totalGoals: goalDocs.length,
+          avgWeeklyScore,
         },
+        weeklyActivity,
         tasks,
         habits,
         goals,

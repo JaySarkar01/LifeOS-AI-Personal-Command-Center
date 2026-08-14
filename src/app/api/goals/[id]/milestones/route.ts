@@ -52,17 +52,26 @@ export async function POST(
       goalEntity.addMilestone(body.title.trim());
     }
 
-    goalDoc.milestones = goalEntity.milestones;
-    goalDoc.status = goalEntity.status;
-    await goalDoc.save();
+    const updatedDoc = await GoalModel.findOneAndUpdate(
+      { _id: goalId, userId },
+      { $set: { milestones: goalEntity.milestones, status: goalEntity.status } },
+      { returnDocument: "after" }
+    );
+
+    if (!updatedDoc) {
+      return NextResponse.json(
+        { success: false, error: { message: "Goal not found or unauthorized" } },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
       data: {
-        id: goalDoc._id.toString(),
-        milestones: goalDoc.milestones,
+        id: updatedDoc._id.toString(),
+        milestones: updatedDoc.milestones,
         progress: goalEntity.calculateProgress(),
-        status: goalDoc.status,
+        status: updatedDoc.status,
       },
     });
   } catch (err) {

@@ -22,7 +22,7 @@ function getFormattedDate(): string {
   return new Date().toLocaleDateString("en-US", options).toUpperCase();
 }
 
-export function DashboardHeader({ userName = "Jay" }: DashboardHeaderProps) {
+export function DashboardHeader({ userName = "User" }: DashboardHeaderProps) {
   const [greeting] = useState<string>(() => getGreeting());
   const [formattedDate] = useState<string>(() => getFormattedDate());
 

@@ -15,14 +15,15 @@ export function TopBar({ onOpenCommandPalette, onOpenMobileDrawer }: TopBarProps
   const { data: session } = useSession();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
-  const userName = session?.user?.name || "Jay Sarkar";
-  const userEmail = session?.user?.email || "jay@example.com";
+  const userName = session?.user?.name || session?.user?.email?.split("@")[0] || "User";
+  const userEmail = session?.user?.email || "";
   const initials = userName
     .split(" ")
+    .filter(Boolean)
     .map((n) => n[0])
     .join("")
     .substring(0, 2)
-    .toUpperCase();
+    .toUpperCase() || "U";
 
   return (
     <>
