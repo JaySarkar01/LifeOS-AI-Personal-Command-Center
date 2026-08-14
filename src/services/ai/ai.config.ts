@@ -3,7 +3,7 @@ export const AI_CONFIG = {
     return process.env.GEMINI_API_KEY || "";
   },
   get model(): string {
-    return process.env.GEMINI_MODEL || "gemini-2.5-flash";
+    return process.env.GEMINI_MODEL || "gemini-3.5-flash";
   },
   timeoutMs: 30000,
   rateLimitWindowMs: 60000, // 1 minute
