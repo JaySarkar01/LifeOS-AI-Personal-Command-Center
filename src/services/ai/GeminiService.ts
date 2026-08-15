@@ -49,17 +49,17 @@ export class GeminiService {
 
   public static parseTaskCreationIntent(prompt: string, todayDateStr: string) {
     let cleaned = prompt.trim().replace(/\.$/, "");
-    
+
     // Check if it's a task creation intent
     const isTaskCreation = /^(?:create|add)\s+(?:a\s+)?task\s+(?:called\s+)?/i.test(cleaned);
     if (!isTaskCreation) return null;
-    
+
     // Remove the prefix
     cleaned = cleaned.replace(/^(?:create|add)\s+(?:a\s+)?task\s+(?:called\s+)?/i, "");
-    
+
     // Remove wrapping quotes if present
     cleaned = cleaned.replace(/^["']|["']$/g, "").trim();
-    
+
     // Check for suffix " tomorrow" or " today"
     let when = "";
     if (cleaned.toLowerCase().endsWith(" tomorrow")) {
@@ -69,10 +69,10 @@ export class GeminiService {
       when = "today";
       cleaned = cleaned.substring(0, cleaned.length - " today".length).trim();
     }
-    
+
     // Clean any trailing quotes after removing suffix
     const title = cleaned.replace(/^["']|["']$/g, "").trim();
-    
+
     let dueDate = todayDateStr;
     if (when === "tomorrow") {
       const date = new Date(todayDateStr + "T00:00:00");
@@ -82,7 +82,7 @@ export class GeminiService {
       const dd = String(date.getDate()).padStart(2, "0");
       dueDate = `${yyyy}-${mm}-${dd}`;
     }
-    
+
     return {
       title,
       dueDate,
@@ -332,10 +332,10 @@ export class GeminiService {
           actions: actionIntent.actions,
           suggestedAction: actionIntent.actions[0]
             ? {
-                type: actionIntent.actions[0].type,
-                status: "pending",
-                data: actionIntent.actions[0].payload,
-              }
+              type: actionIntent.actions[0].type,
+              status: "pending",
+              data: actionIntent.actions[0].payload,
+            }
             : undefined,
         });
       }
@@ -350,7 +350,7 @@ export class GeminiService {
 
     try {
       const systemMessage = `${SYSTEM_BASE_PROMPT}\n\nCurrent User Workspace Context:\n${contextSnippet}`;
-      
+
       const historyPrompt = conversationHistory
         .slice(-4)
         .map((h) => `${h.role.toUpperCase()}: ${h.content}`)
@@ -380,15 +380,15 @@ export class GeminiService {
     const hasData = context.tasks.length > 0 || context.habits.length > 0;
     const fallback: AIInsightResult = hasData
       ? {
-          headline: "Focus on High-Priority Items",
-          insight: `You have ${context.tasks.length} active tasks today. Completing "${context.tasks[0]?.title || "your main task"}" first will build strong momentum.`,
-          actionableTip: "Dedicate your first focus block to your top priority task.",
-        }
+        headline: "Focus on High-Priority Items",
+        insight: `You have ${context.tasks.length} active tasks today. Completing "${context.tasks[0]?.title || "your main task"}" first will build strong momentum.`,
+        actionableTip: "Dedicate your first focus block to your top priority task.",
+      }
       : {
-          headline: "Welcome to LifeOS",
-          insight: "Add some workspace tasks and habits and I'll start identifying patterns.",
-          actionableTip: "Start by creating 2-3 focus tasks for your day.",
-        };
+        headline: "Welcome to LifeOS",
+        insight: "Add some workspace tasks and habits and I'll start identifying patterns.",
+        actionableTip: "Start by creating 2-3 focus tasks for your day.",
+      };
 
     if (!ai) return fallback;
 
@@ -416,17 +416,17 @@ export class GeminiService {
     const hasData = context.tasks.length > 0 || context.schedule.length > 0;
     const fallback: AIDailySummaryResult = hasData
       ? {
-          summary: `You have ${context.tasks.length} active tasks and ${context.schedule.length} scheduled events today.`,
-          priorities: context.tasks.slice(0, 2).map((t) => ({ title: t.title, reason: `Priority: ${t.priority}` })),
-          warnings: [],
-          suggestions: ["Focus on completing your top priority task before noon."],
-        }
+        summary: `You have ${context.tasks.length} active tasks and ${context.schedule.length} scheduled events today.`,
+        priorities: context.tasks.slice(0, 2).map((t) => ({ title: t.title, reason: `Priority: ${t.priority}` })),
+        warnings: [],
+        suggestions: ["Focus on completing your top priority task before noon."],
+      }
       : {
-          summary: "No tasks or events are currently scheduled for today.",
-          priorities: [],
-          warnings: [],
-          suggestions: ["Add your primary tasks for today to generate a daily summary."],
-        };
+        summary: "No tasks or events are currently scheduled for today.",
+        priorities: [],
+        warnings: [],
+        suggestions: ["Add your primary tasks for today to generate a daily summary."],
+      };
 
     if (!ai) return fallback;
 

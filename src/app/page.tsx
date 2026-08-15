@@ -3,21 +3,21 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Sparkles, 
-  CheckSquare, 
-  Repeat, 
-  Target, 
-  StickyNote, 
-  Calendar, 
-  ShieldCheck, 
-  ArrowRight, 
-  Menu, 
-  X, 
-  Lock, 
-  Cpu, 
-  Layers, 
-  CheckCircle2, 
+import {
+  Sparkles,
+  CheckSquare,
+  Repeat,
+  Target,
+  StickyNote,
+  Calendar,
+  ShieldCheck,
+  ArrowRight,
+  Menu,
+  X,
+  Lock,
+  Cpu,
+  Layers,
+  CheckCircle2,
   ChevronRight,
   Flame
 } from "lucide-react";
@@ -72,7 +72,7 @@ export default function LandingPage() {
           </div>
 
           {/* Mobile Hamburger Toggle */}
-          <button 
+          <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="md:hidden p-2 rounded-lg text-muted hover:text-foreground"
             aria-label="Toggle menu"
@@ -84,7 +84,7 @@ export default function LandingPage() {
         {/* Mobile Navigation Drawer */}
         <AnimatePresence>
           {mobileMenuOpen && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
@@ -117,28 +117,28 @@ export default function LandingPage() {
             </GlassBadge>
           </motion.div>
 
-          <motion.h1 
-            variants={fadeUp(16)} 
-            initial="initial" 
-            animate="animate" 
+          <motion.h1
+            variants={fadeUp(16)}
+            initial="initial"
+            animate="animate"
             className="font-display text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight max-w-4xl text-foreground leading-[1.1]"
           >
             YOUR LIFE. <span className="bg-gradient-to-r from-cyan-400 via-sky-400 to-indigo-400 bg-clip-text text-transparent">ONE SYSTEM.</span>
           </motion.h1>
 
-          <motion.p 
-            variants={fadeUp(24)} 
-            initial="initial" 
-            animate="animate" 
+          <motion.p
+            variants={fadeUp(24)}
+            initial="initial"
+            animate="animate"
             className="text-base sm:text-lg text-muted max-w-2xl leading-relaxed font-normal"
           >
             An AI-powered personal command center for tasks, habits, goals, notes, and your day — structured in one private, glass-morphism workspace.
           </motion.p>
 
-          <motion.div 
-            variants={fadeUp(32)} 
-            initial="initial" 
-            animate="animate" 
+          <motion.div
+            variants={fadeUp(32)}
+            initial="initial"
+            animate="animate"
             className="flex flex-col sm:flex-row items-center gap-4 mt-2 w-full sm:w-auto"
           >
             <Link href="/register" className="w-full sm:w-auto">
@@ -174,11 +174,10 @@ export default function LandingPage() {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                      className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
-                        isActive 
-                          ? "bg-accent text-accent-foreground shadow-sm" 
+                      className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${isActive
+                          ? "bg-accent text-accent-foreground shadow-sm"
                           : "text-muted hover:text-foreground hover:bg-card/40"
-                      }`}
+                        }`}
                     >
                       <Icon className="w-3.5 h-3.5" />
                       <span>{tab.label}</span>
@@ -308,7 +307,7 @@ export default function LandingPage() {
                 <div className="flex flex-col gap-3 animate-in fade-in duration-200">
                   <div className="p-3.5 rounded-xl bg-accent/10 border border-accent/20 flex items-center gap-3">
                     <Sparkles className="w-4 h-4 text-accent shrink-0" />
-                    <span className="text-xs text-foreground font-medium">LifeOS Intelligence • Powered by Google Gemini 2.5 Flash</span>
+                    <span className="text-xs text-foreground font-medium">LifeOS Intelligence • Powered by Google Gemini 3.5 Flash</span>
                   </div>
                   <div className="p-4 rounded-xl bg-card/80 border border-card-border flex flex-col gap-2">
                     <span className="text-xs font-semibold text-accent">User: What should I focus on today?</span>
