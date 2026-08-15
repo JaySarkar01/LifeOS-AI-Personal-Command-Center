@@ -598,4 +598,69 @@ export class GeminiService {
       return fallback;
     }
   }
+
+  /**
+   * Generates Financial Insights based on recent transactions.
+   */
+  public static async generateFinancialInsight(userId: string, context: { income: number; expenses: number; topCategories: { category: string; amount: number }[] }): Promise<{ headline: string; insight: string; tip: string }> {
+    const ai = this.getAIInstance();
+    
+    const fallback = {
+      headline: "Track Your Spending",
+      insight: "You haven't logged enough transactions this month for a detailed analysis.",
+      tip: "Start by logging your daily expenses to see patterns.",
+    };
+
+    if (!ai || (context.income === 0 && context.expenses === 0)) return fallback;
+
+    try {
+      const prompt = `Analyze this financial summary for the current month:
+Income: $${context.income}
+Expenses: $${context.expenses}
+Top Spending Categories: ${context.topCategories.map(c => `${c.category} ($${c.amount})`).join(", ")}
+
+Provide a brief, encouraging financial insight. Return ONLY valid JSON:
+{
+  "headline": "Short catchy title (max 5 words)",
+  "insight": "1-2 sentences analyzing their spending/saving ratio or category habits",
+  "tip": "1 actionable piece of financial advice based on the data"
+}`;
+      const res = await ai.models.generateContent({
+        model: AI_CONFIG.model,
+        contents: `${SYSTEM_BASE_PROMPT}\n${prompt}`,
+      });
+
+      const parsed = this.parseJson<{ headline: string; insight: string; tip: string }>(res.text || "");
+      return parsed || fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  /**
+   * Auto-categorizes a transaction based on description.
+   */
+  public static async autoCategorizeTransaction(description: string, amount: number): Promise<{ category: string }> {
+    const ai = this.getAIInstance();
+    const fallback = { category: "General" };
+    if (!ai || !description) return fallback;
+
+    try {
+      const prompt = `Categorize this transaction:
+Description: "${description}"
+Amount: $${amount}
+
+Return ONLY valid JSON with a single "category" string field representing a standard budget category (e.g., "Groceries", "Dining", "Utilities", "Entertainment", "Transport", "Income", "Shopping", "Housing").`;
+      
+      const res = await ai.models.generateContent({
+        model: AI_CONFIG.model,
+        contents: prompt,
+      });
+
+      const parsed = this.parseJson<{ category: string }>(res.text || "");
+      return parsed || fallback;
+    } catch {
+      return fallback;
+    }
+  }
 }

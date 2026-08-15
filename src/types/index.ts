@@ -6,6 +6,11 @@ export type GoalStatus = "not_started" | "in_progress" | "achieved" | "paused";
 
 export type EventType = "focus_session" | "meeting" | "reminder" | "personal";
 export type NoteType = "quick" | "document" | "journal" | "code";
+export type JournalMood = "great" | "good" | "neutral" | "low" | "bad";
+
+export type TransactionType = "income" | "expense" | "transfer";
+export type AccountType = "checking" | "savings" | "credit" | "cash";
+export type BudgetPeriod = "weekly" | "monthly" | "yearly";
 
 export interface UserPreferences {
   theme: "light" | "dark" | "system";
