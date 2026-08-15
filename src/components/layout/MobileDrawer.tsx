@@ -65,19 +65,43 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
+  // Lock background scroll when drawer is open
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const originalOverflow = document.body.style.overflow;
+    const originalPosition = document.body.style.position;
+    const originalTop = document.body.style.top;
+    const originalWidth = document.body.style.width;
+    const scrollY = window.scrollY;
+
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.body.style.position = originalPosition;
+      document.body.style.top = originalTop;
+      document.body.style.width = originalWidth;
+      window.scrollTo(0, scrollY);
+    };
+  }, [isOpen]);
+
   const sections: NavItem["section"][] = ["PRODUCTIVITY", "KNOWLEDGE", "INTELLIGENCE", "LIFE", "SYSTEM"];
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 md:hidden flex justify-end">
+        <div className="fixed inset-0 z-50 md:hidden flex justify-end touch-none">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-background/80 backdrop-blur-md"
+            className="fixed inset-0 bg-background/80 backdrop-blur-md touch-none"
           />
 
           {/* Slide-over Glass Sheet Drawer */}
@@ -86,7 +110,7 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", stiffness: 320, damping: 32 }}
-            className="relative w-[85%] max-w-sm h-full bg-panel border-l border-panel-border shadow-glass-lg backdrop-blur-2xl p-6 flex flex-col justify-between overflow-y-auto z-10"
+            className="relative w-[85%] max-w-sm h-full bg-panel border-l border-panel-border shadow-glass-lg backdrop-blur-2xl p-6 flex flex-col justify-between overflow-y-auto overscroll-contain touch-pan-y z-10"
           >
             <div className="flex flex-col gap-6">
               {/* Drawer Header */}
