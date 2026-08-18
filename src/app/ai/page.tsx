@@ -365,7 +365,7 @@ export default function AIPage() {
                     <h2 className="font-display font-bold text-sm text-foreground">LifeOS Intelligence</h2>
                     <span className="flex items-center gap-1 text-[10px] text-emerald-500 dark:text-emerald-400 font-mono font-semibold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      Gemini 2.5
+                      Gemini 3.5
                     </span>
                   </div>
                   <span className="text-[11px] text-muted hidden sm:inline">
@@ -387,9 +387,10 @@ export default function AIPage() {
                   </button>
                 )}
 
+                {/* Context button - DESKTOP ONLY */}
                 <button
                   onClick={() => setShowContextPanel(!showContextPanel)}
-                  className={`p-2 rounded-xl border transition-all text-xs flex items-center gap-1.5 cursor-pointer ${
+                  className={`hidden lg:flex p-2 rounded-xl border transition-all text-xs items-center gap-1.5 cursor-pointer ${
                     showContextPanel
                       ? "bg-accent/15 border-accent/40 text-accent font-semibold"
                       : "bg-card/60 border-card-border text-muted hover:text-foreground"
@@ -401,7 +402,7 @@ export default function AIPage() {
                   ) : (
                     <PanelRightOpen className="w-4 h-4" />
                   )}
-                  <span className="hidden sm:inline text-xs">Context</span>
+                  <span className="text-xs">Context</span>
                   {totalContextItems > 0 && (
                     <span className="px-1.5 py-0.2 rounded-full bg-accent text-accent-foreground text-[10px] font-bold font-mono">
                       {totalContextItems}
