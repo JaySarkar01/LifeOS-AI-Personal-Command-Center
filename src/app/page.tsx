@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles,
@@ -56,10 +57,28 @@ export default function LandingPage() {
   }, [mobileMenuOpen]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col overflow-x-hidden selection:bg-accent/30 selection:text-foreground">
+    <div className="min-h-screen bg-background text-foreground flex flex-col overflow-x-hidden selection:bg-accent/30 selection:text-foreground relative">
+      {/* Background Image Layer */}
+      <div className="fixed inset-0 w-full h-full pointer-events-none z-0 overflow-hidden select-none">
+        <Image
+          src="/images/lifeos-landing-background.png"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-right-bottom md:object-right-center opacity-[0.04] dark:opacity-[0.16] md:opacity-[0.1] md:dark:opacity-[0.28] transition-opacity duration-700 select-none pointer-events-none"
+        />
+        {/* Ambient Gradient Overlays for readability (fades from background color to transparent from left-to-right & bottom-to-top) */}
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" />
+      </div>
+
       {/* Background ambient lighting */}
       <div className="fixed top-[-10%] left-[20%] w-[60vw] h-[60vw] max-w-[800px] max-h-[800px] rounded-full bg-[radial-gradient(circle,var(--color-accent)_0%,transparent_70%)] opacity-[0.08] blur-[160px] pointer-events-none z-0" />
       <div className="fixed bottom-[-10%] right-[10%] w-[50vw] h-[50vw] max-w-[600px] max-h-[600px] rounded-full bg-[radial-gradient(circle,var(--color-accent-secondary)_0%,transparent_70%)] opacity-[0.06] blur-[140px] pointer-events-none z-0" />
+
+      {/* Glass/Blur Blending Layer */}
+      <div className="fixed inset-0 backdrop-blur-[1px] pointer-events-none z-0" />
 
       {/* 1. PUBLIC NAVIGATION BAR */}
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/70 backdrop-blur-xl">
@@ -131,7 +150,7 @@ export default function LandingPage() {
         </AnimatePresence>
       </header>
 
-      <main className="flex-1 z-10">
+      <main className="flex-1 relative z-10">
         {/* 2. HERO SECTION */}
         <section className="relative pt-16 md:pt-28 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center flex flex-col items-center gap-6">
           <motion.div variants={fadeUp()} initial="initial" animate="animate">
@@ -542,7 +561,7 @@ export default function LandingPage() {
       </main>
 
       {/* 10. FOOTER */}
-      <footer className="w-full border-t border-border/40 bg-background/80 py-8 px-4 sm:px-6 lg:px-8 z-10 text-xs text-muted">
+      <footer className="w-full border-t border-border/40 bg-background/80 py-8 px-4 sm:px-6 lg:px-8 relative z-10 text-xs text-muted">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 font-display font-bold text-foreground">
             <div className="w-5 h-5 rounded-lg bg-accent flex items-center justify-center text-accent-foreground text-xs">◈</div>
