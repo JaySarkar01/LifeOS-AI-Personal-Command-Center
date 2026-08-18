@@ -43,7 +43,7 @@ export function AIInput({ onSend, onClear, isLoading }: AIInputProps) {
 
   return (
     <form onSubmit={handleSubmit} className="relative w-full">
-      <div className="relative flex items-end gap-2 p-2 rounded-2xl bg-card/80 border border-card-border/90 focus-within:border-accent/50 focus-within:ring-2 focus-within:ring-accent/20 backdrop-blur-xl shadow-glass transition-all">
+      <div className="relative flex items-end gap-2 p-2 rounded-2xl bg-card/80 border border-card-border/90 focus-within:border-accent/50 focus-within:ring-2 focus-within:ring-accent/20 focus-within:shadow-[0_0_25px_rgba(56,189,248,0.12)] backdrop-blur-xl shadow-glass transition-all">
         {/* Left Sparkle / Prompt icon */}
         <div className="p-2 text-muted select-none flex items-center justify-center shrink-0">
           <Sparkles className={`w-4 h-4 transition-colors ${hasContent ? "text-accent" : "text-muted"}`} />
@@ -58,7 +58,8 @@ export function AIInput({ onSend, onClear, isLoading }: AIInputProps) {
           rows={1}
           placeholder="Ask LifeOS anything about your tasks, habits, schedule, or goals..."
           disabled={isLoading}
-          className="flex-1 max-h-40 min-h-[38px] py-2 bg-transparent text-xs md:text-sm text-foreground placeholder:text-muted/70 focus:outline-none resize-none leading-relaxed"
+          style={{ outline: "none", boxShadow: "none" }}
+          className="flex-1 max-h-40 min-h-[38px] py-2 bg-transparent text-xs md:text-sm text-foreground placeholder:text-muted/70 border-none outline-none ring-0 focus:outline-none focus:ring-0 focus:border-none focus-visible:outline-none focus-visible:ring-0 shadow-none resize-none leading-relaxed"
         />
 
         {/* Actions Button Group */}
@@ -78,11 +79,10 @@ export function AIInput({ onSend, onClear, isLoading }: AIInputProps) {
           <button
             type="submit"
             disabled={isLoading || !hasContent}
-            className={`flex items-center justify-center h-8 w-8 md:h-9 md:w-9 rounded-xl transition-all font-semibold cursor-pointer ${
-              hasContent && !isLoading
-                ? "bg-gradient-to-br from-accent to-accent-hover text-accent-foreground shadow-[0_0_15px_rgba(56,189,248,0.4)] scale-100"
-                : "bg-foreground/5 text-muted/50 cursor-not-allowed scale-95"
-            }`}
+            className={`flex items-center justify-center h-8 w-8 md:h-9 md:w-9 rounded-xl transition-all font-semibold cursor-pointer ${hasContent && !isLoading
+              ? "bg-gradient-to-br from-accent to-accent-hover text-accent-foreground shadow-[0_0_15px_rgba(56,189,248,0.4)] scale-100"
+              : "bg-foreground/5 text-muted/50 cursor-not-allowed scale-95"
+              }`}
             title="Send message (Enter)"
           >
             <Send className="w-3.5 h-3.5" />
