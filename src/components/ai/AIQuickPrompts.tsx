@@ -1,6 +1,7 @@
+"use client";
+
 import React from "react";
-import { Sparkles } from "lucide-react";
-import { GlassButton } from "@/components/ui/GlassButton";
+import { Sparkles, Calendar, Target, Repeat, CheckSquare } from "lucide-react";
 
 interface AIQuickPromptsProps {
   onSelectPrompt: (promptText: string) => void;
@@ -8,33 +9,34 @@ interface AIQuickPromptsProps {
 }
 
 const PROMPTS = [
-  "What should I focus on today?",
-  "Plan my day.",
-  "Review my current goals.",
-  "How consistent have my habits been?",
-  "Help me prioritize my tasks.",
-  "Summarize my week.",
+  { text: "What should I focus on today?", icon: CheckSquare },
+  { text: "Plan my schedule for today", icon: Calendar },
+  { text: "Review my current goals", icon: Target },
+  { text: "Check my habit streak momentum", icon: Repeat },
+  { text: "Break down a big project into tasks", icon: Sparkles },
 ];
 
 export function AIQuickPrompts({ onSelectPrompt, disabled }: AIQuickPromptsProps) {
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <span className="text-xs font-semibold text-muted uppercase flex items-center gap-1.5 mr-1">
-        <Sparkles className="w-3.5 h-3.5 text-accent" /> Suggested:
+    <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
+      <span className="text-[10px] font-semibold text-muted/70 uppercase flex items-center gap-1 shrink-0 mr-1 font-mono">
+        <Sparkles className="w-3 h-3 text-accent" /> Quick:
       </span>
-      {PROMPTS.map((prompt) => (
-        <GlassButton
-          key={prompt}
-          type="button"
-          variant="ghost"
-          size="sm"
-          disabled={disabled}
-          onClick={() => onSelectPrompt(prompt)}
-          className="text-xs py-1 px-3 border border-card-border/60 hover:border-accent/40 rounded-full text-foreground/80 hover:text-foreground"
-        >
-          {prompt}
-        </GlassButton>
-      ))}
+      {PROMPTS.map((p) => {
+        const Icon = p.icon;
+        return (
+          <button
+            key={p.text}
+            type="button"
+            disabled={disabled}
+            onClick={() => onSelectPrompt(p.text)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card/60 hover:bg-card border border-card-border/70 hover:border-accent/40 text-foreground/80 hover:text-foreground text-xs font-medium whitespace-nowrap transition-all cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98] shrink-0 disabled:opacity-50 disabled:pointer-events-none"
+          >
+            <Icon className="w-3 h-3 text-accent/80" />
+            <span>{p.text}</span>
+          </button>
+        );
+      })}
     </div>
   );
 }

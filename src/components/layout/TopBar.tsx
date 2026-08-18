@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { Search, Bell, Menu, Sparkles, LogOut, Settings } from "lucide-react";
-import ThemeToggle from "@/components/ui/ThemeToggle";
 
 export interface TopBarProps {
   onOpenCommandPalette: () => void;
