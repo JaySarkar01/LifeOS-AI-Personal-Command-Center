@@ -16,10 +16,12 @@ import {
   BookOpen, 
   CreditCard, 
   Palette, 
-  Settings 
+  Settings,
+  LogOut 
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ThemeToggle from "@/components/ui/ThemeToggle";
+import { signOut } from "next-auth/react";
 
 interface NavItem {
   id: string;
@@ -169,9 +171,18 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
             </div>
 
             {/* Drawer Footer */}
-            <div className="pt-4 border-t border-border/40 flex items-center justify-between">
-              <span className="text-xs text-muted font-medium">Appearance</span>
-              <ThemeToggle />
+            <div className="pt-4 border-t border-border/40 flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted font-medium">Appearance</span>
+                <ThemeToggle />
+              </div>
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-medium text-destructive/80 hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer w-full"
+              >
+                <LogOut className="w-4 h-4 shrink-0" />
+                <span>Sign Out</span>
+              </button>
             </div>
           </motion.div>
         </div>

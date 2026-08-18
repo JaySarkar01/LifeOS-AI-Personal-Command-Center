@@ -16,11 +16,13 @@ import {
   Palette, 
   Settings,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  LogOut
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SidebarNav, NavItemConfig } from "@/components/layout/SidebarNav";
 import ThemeToggle from "@/components/ui/ThemeToggle";
+import { signOut } from "next-auth/react";
 
 export interface SidebarProps {
   isCollapsed: boolean;
@@ -81,10 +83,23 @@ export function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps) {
         <SidebarNav items={navItems} isCollapsed={isCollapsed} />
       </div>
 
-      {/* Footer Appearance */}
-      <div className={cn("px-4 pt-4 border-t border-border/40 flex items-center", isCollapsed ? "justify-center" : "justify-between")}>
-        {!isCollapsed && <span className="text-[11px] text-muted font-medium">Appearance</span>}
-        <ThemeToggle />
+      {/* Footer */}
+      <div className={cn("px-4 pt-4 border-t border-border/40 flex flex-col gap-3", isCollapsed ? "items-center" : "")}>
+        <div className={cn("flex items-center", isCollapsed ? "justify-center" : "justify-between")}>
+          {!isCollapsed && <span className="text-[11px] text-muted font-medium">Appearance</span>}
+          <ThemeToggle />
+        </div>
+        <button
+          onClick={() => signOut({ callbackUrl: "/" })}
+          className={cn(
+            "flex items-center gap-2.5 rounded-xl text-xs font-medium text-destructive/80 hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer",
+            isCollapsed ? "justify-center p-2" : "px-3 py-2"
+          )}
+          title="Sign Out"
+        >
+          <LogOut className="w-4 h-4 shrink-0" />
+          {!isCollapsed && <span>Sign Out</span>}
+        </button>
       </div>
     </motion.aside>
   );

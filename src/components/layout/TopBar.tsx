@@ -125,8 +125,6 @@ export function TopBar({ onOpenCommandPalette, onOpenMobileDrawer }: TopBarProps
             <Search className="w-4 h-4" />
           </button>
 
-          <ThemeToggle />
-
           <button
             onClick={onOpenMobileDrawer}
             className="p-2 rounded-lg bg-card/60 border border-card-border text-foreground hover:text-accent focus:outline-none"

@@ -227,10 +227,10 @@ export default function NotesPage() {
             <div className={`lg:col-span-8 ${selectedNoteId ? "flex flex-col" : "hidden lg:flex"}`}>
               {selectedNote ? (
                 <GlassPanel className="flex-1 flex flex-col gap-4 p-6 md:p-8">
-                  <div className="flex items-center justify-between gap-4 pb-3 border-b border-border/40">
+                  <div className="flex items-center justify-between gap-3 pb-3 border-b border-border/40">
                     <button
                       onClick={() => setSelectedNoteId(null)}
-                      className="lg:hidden p-1.5 rounded-lg text-muted hover:text-foreground flex items-center gap-1 text-xs"
+                      className="lg:hidden p-1.5 rounded-lg text-muted hover:text-foreground flex items-center gap-1 text-xs shrink-0"
                     >
                       <ArrowLeft className="w-4 h-4" /> Back
                     </button>
@@ -239,9 +239,9 @@ export default function NotesPage() {
                       value={activeTitle}
                       onChange={(e) => setActiveTitle(e.target.value)}
                       placeholder="Note Title..."
-                      className="bg-transparent font-display font-bold text-xl text-foreground focus:outline-none flex-1"
+                      className="bg-transparent font-display font-bold text-xl text-foreground focus:outline-none flex-1 min-w-0"
                     />
-                    <GlassButton variant="primary" size="sm" onClick={handleSaveNote} disabled={isSaving} className="gap-1.5">
+                    <GlassButton variant="primary" size="sm" onClick={handleSaveNote} disabled={isSaving} className="gap-1.5 shrink-0">
                       <Save className="w-3.5 h-3.5" /> {isSaving ? "Saving..." : "Save"}
                     </GlassButton>
                   </div>
