@@ -9,7 +9,7 @@ export type NoteType = "quick" | "document" | "journal" | "code";
 export type JournalMood = "great" | "good" | "neutral" | "low" | "bad";
 
 export type TransactionType = "income" | "expense" | "transfer";
-export type AccountType = "checking" | "savings" | "credit" | "cash";
+export type AccountType = "checking" | "savings" | "credit" | "cash" | "investment";
 export type BudgetPeriod = "weekly" | "monthly" | "yearly";
 
 export interface UserPreferences {
@@ -17,6 +17,7 @@ export interface UserPreferences {
   accentColor: string;
   notificationsEnabled: boolean;
   dailyFocusTargetMinutes: number;
+  currency?: string;
 }
 
 export interface Milestone {

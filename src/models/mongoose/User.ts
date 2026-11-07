@@ -20,6 +20,7 @@ const UserSchema = new Schema<IUserDocument>(
       accentColor: { type: String, default: "#0284c7" },
       notificationsEnabled: { type: Boolean, default: true },
       dailyFocusTargetMinutes: { type: Number, default: 240 },
+      currency: { type: String, default: "INR" },
     },
   },
   { timestamps: true }

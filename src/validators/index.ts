@@ -61,9 +61,30 @@ export const UpdateJournalEntrySchema = CreateJournalEntrySchema.partial().omit(
 export const CreateAccountSchema = z.object({
   userId: z.string().min(1, "User ID is required"),
   name: z.string().min(1, "Account name is required").max(100),
-  type: z.enum(["checking", "savings", "credit", "cash"]).optional(),
+  bankName: z.string().max(100).optional(),
+  accountNumber: z.string().max(30).optional(),
+  type: z.enum(["checking", "savings", "credit", "cash", "investment"]).optional(),
   balance: z.number().optional(),
-  currency: z.string().length(3).optional(),
+  currency: z.string().min(1).max(10).optional(),
+  color: z.string().optional(),
+});
+
+export const UpdateAccountSchema = z.object({
+  name: z.string().min(1, "Account name cannot be empty").max(100).optional(),
+  bankName: z.string().max(100).optional(),
+  accountNumber: z.string().max(30).optional(),
+  type: z.enum(["checking", "savings", "credit", "cash", "investment"]).optional(),
+  balance: z.number().optional(),
+  currency: z.string().min(1).max(10).optional(),
+  color: z.string().optional(),
+});
+
+export const TransferFundsSchema = z.object({
+  fromAccountId: z.string().min(1, "Source account is required"),
+  toAccountId: z.string().min(1, "Destination account is required"),
+  amount: z.number().positive("Amount must be greater than 0"),
+  description: z.string().max(250).optional(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD"),
 });
 
 export const CreateTransactionSchema = z.object({

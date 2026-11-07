@@ -17,9 +17,14 @@ export async function GET() {
     const data = accounts.map(doc => ({
       id: doc._id.toString(),
       name: doc.name,
+      bankName: doc.bankName || "",
+      accountNumber: doc.accountNumber || "",
       type: doc.type,
       balance: doc.balance,
       currency: doc.currency,
+      color: doc.color || "blue",
+      createdAt: doc.createdAt,
+      updatedAt: doc.updatedAt,
     }));
 
     return NextResponse.json({ success: true, data });
@@ -54,9 +59,12 @@ export async function POST(req: Request) {
       data: {
         id: doc._id.toString(),
         name: doc.name,
+        bankName: doc.bankName || "",
+        accountNumber: doc.accountNumber || "",
         type: doc.type,
         balance: doc.balance,
         currency: doc.currency,
+        color: doc.color || "blue",
       }
     }, { status: 201 });
   } catch (err) {

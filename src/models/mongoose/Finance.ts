@@ -5,6 +5,9 @@ import { AccountType, TransactionType, BudgetPeriod } from "@/types";
 export interface IAccountDocument extends Document {
   userId: mongoose.Types.ObjectId;
   name: string;
+  bankName?: string;
+  accountNumber?: string;
+  color?: string;
   type: AccountType;
   balance: number;
   currency: string;
@@ -16,9 +19,12 @@ const AccountSchema = new Schema<IAccountDocument>(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
     name: { type: String, required: true },
-    type: { type: String, enum: ["checking", "savings", "credit", "cash"], default: "checking" },
+    bankName: { type: String, default: "" },
+    accountNumber: { type: String, default: "" },
+    color: { type: String, default: "blue" },
+    type: { type: String, enum: ["checking", "savings", "credit", "cash", "investment"], default: "checking" },
     balance: { type: Number, default: 0 },
-    currency: { type: String, default: "USD" },
+    currency: { type: String, default: "INR" },
   },
   { timestamps: true }
 );

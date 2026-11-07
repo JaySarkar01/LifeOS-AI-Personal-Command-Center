@@ -4,6 +4,9 @@ export interface AccountProps {
   id: string;
   userId: string;
   name: string;
+  bankName?: string;
+  accountNumber?: string;
+  color?: string;
   type?: AccountType;
   balance?: number;
   currency?: string;
@@ -15,6 +18,9 @@ export class Account {
   public readonly id: string;
   public readonly userId: string;
   public name: string;
+  public bankName: string;
+  public accountNumber: string;
+  public color: string;
   public type: AccountType;
   public balance: number;
   public currency: string;
@@ -25,9 +31,12 @@ export class Account {
     this.id = props.id;
     this.userId = props.userId;
     this.name = props.name;
+    this.bankName = props.bankName || "";
+    this.accountNumber = props.accountNumber || "";
+    this.color = props.color || "blue";
     this.type = props.type || "checking";
     this.balance = props.balance || 0;
-    this.currency = props.currency || "USD";
+    this.currency = props.currency || "INR";
     this.createdAt = props.createdAt || new Date();
     this.updatedAt = props.updatedAt || new Date();
   }

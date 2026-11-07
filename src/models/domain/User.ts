@@ -27,6 +27,7 @@ export class User {
       accentColor: "#0284c7",
       notificationsEnabled: true,
       dailyFocusTargetMinutes: 240,
+      currency: "INR",
       ...props.preferences,
     };
     this.createdAt = props.createdAt || new Date();

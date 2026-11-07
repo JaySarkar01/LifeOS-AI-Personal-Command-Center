@@ -4,6 +4,7 @@ import { Goal, GoalProps } from "@/models/domain/Goal";
 import { Note, NoteProps } from "@/models/domain/Note";
 import { Event, EventProps } from "@/models/domain/Event";
 import { User, UserProps } from "@/models/domain/User";
+import { Account, AccountProps, Transaction, TransactionProps } from "@/models/domain/Finance";
 
 export class EntityFactory {
   private static generateId(prefix: string): string {
@@ -48,6 +49,20 @@ export class EntityFactory {
   public static createUser(props: Omit<UserProps, "id"> & { id?: string }): User {
     return new User({
       id: props.id || this.generateId("usr"),
+      ...props,
+    });
+  }
+
+  public static createAccount(props: Omit<AccountProps, "id"> & { id?: string }): Account {
+    return new Account({
+      id: props.id || this.generateId("acc"),
+      ...props,
+    });
+  }
+
+  public static createTransaction(props: Omit<TransactionProps, "id"> & { id?: string }): Transaction {
+    return new Transaction({
+      id: props.id || this.generateId("txn"),
       ...props,
     });
   }
