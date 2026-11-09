@@ -3,17 +3,17 @@
 import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { 
-  LayoutDashboard, 
-  CheckSquare, 
-  Repeat, 
-  Calendar, 
-  Target, 
-  StickyNote, 
-  Sparkles, 
-  BookOpen, 
-  CreditCard, 
-  Palette, 
+import {
+  LayoutDashboard,
+  CheckSquare,
+  Repeat,
+  Calendar,
+  Target,
+  StickyNote,
+  Sparkles,
+  BookOpen,
+  CreditCard,
+  Palette,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -44,7 +44,6 @@ export function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps) {
     { id: "journal", label: "Journal", icon: BookOpen, href: "/journal", section: "LIFE" },
     { id: "finance", label: "Finance", icon: CreditCard, href: "/finance", section: "LIFE" },
 
-    { id: "ds", label: "Design System", icon: Palette, href: "/design-system", section: "SYSTEM" },
     { id: "set", label: "Settings", icon: Settings, href: "/settings", section: "SYSTEM" },
   ];
 
